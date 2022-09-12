@@ -23,7 +23,7 @@
 import ThreadPageVue from './ThreadPage.vue';
 export default {
   components:{
-    ThreadPageVue
+    //ThreadPageVue
   }
 
 }

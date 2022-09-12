@@ -52,7 +52,7 @@ export default {
 
 <style>
   body{
-    background-color: #5F5F5F;
+    background-color: #d0cedc;
   }
 </style>
 
