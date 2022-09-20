@@ -5,6 +5,7 @@ const morgan = require('morgan'); //middleware qui enregistre les requests
 require('dotenv').config(); // charger variables env
 const connection = require('./services/dbConnection'); // module mysql et connection BDD
 const userRoute = require('./routes/users'); //importation du router "users"
+const socialActivities = require('./routes/threads');//importation du router "threads"
 
 const app = express(); //Appel de la méthode Express
 morgan.token('body', (req => JSON.stringify(req.body)));
@@ -24,6 +25,7 @@ app.options('*', cors());
 
 // Gestion des routes
 app.use('/auth', userRoute);
+app.use('/chat' , socialActivities);
 
 //dossier images
 app.use('/images', express.static(path.join(__dirname, '/public/images')));
