@@ -1,27 +1,27 @@
-//Importation du router d'Express
 const express = require('express');
 const router = express.Router();
+const date = require('../services/dateTime');
+const dbquery = require('../services/dbAction');
+const db = require('../services/dbConnection');
+require('bluebird');
 
-//Importation des Middleware 'auth' et 'multer'
-const auth = require('../middleware/auth')
-const multer = require('../middleware/multer-config');
+router.post('/ini',(req, res, next) => {
+    res.status(200).send({'msg':'route reached'});
+} );
+router.post('/sendpost:idowner',(req, res, next) => {
+    res.status(200).send({'msg':'route reached'});
+} );
+router.post('/thread:idowner',(req, res, next) => {
+    res.status(200).send({'msg':'route reached'});
+} );
+router.post('/newthread:idowner',(req, res, next) => {
+    res.status(200).send({'msg':'route reached'});
+} );
+router.put('/updatethread:idowner',(req, res, next) => {
+    res.status(200).send({'msg':'route reached'});
+} );
+router.delete('/deletethread:idowner',(req, res, next) => {
+    res.status(200).send({'msg':'route reached'});
+} );
 
-//Importation des controllers
-const threadCtrl = require('../controllers/thread');
-
-
-//Select All définition des Routers
-router.get('/', auth, threadCtrl.getAllThread);
-//Create
-router.post('/', auth , multer , threadCtrl.createThread);
-//Select One
-router.get('/:id', auth , threadCtrl.selectThread);
-//Update
-router.put('/:id', auth , multer, threadCtrl.updateThread);
-//Delete
-router.delete('/:id', auth , threadCtrl.deleteThread);
-
-router.post('/:id/like' , auth, threadCtrl.functionlike);
-
-//Exportation des Routers
 module.exports = router;
