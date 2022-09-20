@@ -36,17 +36,17 @@ export default {
     },
 
     async [LOGIN_ACTION](context, payload) {
-        console.log ("login_action ok");
+        console.log("login_action ok");
         return context.dispatch(AUTH_ACTION, {
             ...payload,
             url: `http://localhost:3000/auth/login`,
-            
+
         });
-        
+
     },
 
     async [SIGNUP_ACTION](context, payload) {
-        console.log ("signup_action ok");
+        console.log("signup_action ok");
         return context.dispatch(AUTH_ACTION, {
             ...payload,
             url: `http://localhost:3000/auth/signup`,
@@ -79,27 +79,27 @@ export default {
             returnSecureToken: true,
         };
         if (payload.name) {                 // ajout name dans le cas signup
-            postData = { ...postData , name : payload.name };
+            postData = { ...postData, name: payload.name };
         }
-        
+
         let response = '';
-        console.log (postData);
+        //console.log (postData);
         try {
             response = await Axios.post(payload.url, postData);
         } catch (err) {
-             context.commit(LOADING_SPINNER_SHOW_MUTATION, false, {
-                 root: true,
-             });
+            context.commit(LOADING_SPINNER_SHOW_MUTATION, false, {
+                root: true,
+            });
             let errorMessage = SignupValidations.getErrorMessageFromCode(
                 //err.response.data.error.errors[0].message,
-                
+
             );
-            
-            throw errorMessage;
+
+            console.log(errorMessage);
         }
 
         if (response.status === 200) {
-            console.log (response);
+            //console.log (response);
             let expirationTime = +response.data.expiresIn * 1000;
 
             timer = setTimeout(() => {
@@ -113,9 +113,10 @@ export default {
                 //refreshToken: response.data.refreshToken,
                 userId: response.data.userData.UserId,
             };
-            console.log(tokenData);
+            //console.log(tokenData);
             localStorage.setItem('userData', JSON.stringify(tokenData));
             context.commit(SET_USER_TOKEN_DATA_MUTATION, tokenData);
+
         }
     },
 };

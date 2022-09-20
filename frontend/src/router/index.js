@@ -16,59 +16,50 @@ const router = createRouter({
     routes: [
                 {
             path: '/',
-            name: "Root",
-            component: homePage,
-            meta: { auth:false },
+            name: "/",
+            component: homePage, meta: { auth:false },
         },
         {
             path: '/home',
             name: "HomePage",
-            component: homePage,
-            meta: { auth:false },
+            component: homePage, meta: { auth:false },
         },
         {
             path: '/notFound',
             name: "notFound",
-            component: notFound,
-            meta: { auth:false },
+            component: notFound, meta: { auth:false },
         },
         {
             path: '/News',
             name: "NewsPage",
-            component: newsPage,
-            meta: { auth:false },
+            component: newsPage, meta: { auth:false },
         },
 
         // rest of the code ...
         {
             path: '/Chat',
             name: "ChatPage",
-            component: chatPage,
-            meta: { auth:true },
+            component: chatPage, meta: { auth:true },
         },
         {
             path: '/Forum',
             name: "ForumPage",
-            component: forumPage,
-            meta: { auth:true },
+            component: forumPage, meta: { auth:true },
         },
         {
             path: '/Admin',
             name: "AdminPage",
-            component: adminPage,
-            meta: { auth:true },
+            component: adminPage, meta: { auth:true },
         },
         {
             path: '/User',
             name: "UserPage",
-            component: userPage ,
-            meta: { auth:true },
+            component: userPage , meta: { auth:true },
         },
         {
             path: '/Login',
             name: "LoginPage",
-            component: loginPage,
-            meta: { auth:false },
+            component: loginPage, meta: { auth:false },
         }
 
     ]
@@ -81,20 +72,17 @@ router.beforeEach((to, from, next) => {
     ) {
         next('/login'); // un profil non authentifié est dirigé sur la page login si tentative d'accès à une page exigeant une authentification
     } else if (
-        
         'auth' in to.meta &&
         !to.meta.auth &&
         store.getters[`auth/${IS_USER_AUTHENTICATE_GETTER}`]
     ) {
-        //console.log('to.meta: ' + to.meta.auth + ' | ' + store.getters[`auth/${IS_USER_AUTHENTICATE_GETTER}`] );
-        next();      // pour le moment une authentification réussie envoie sur la page User
+        next();      
     } else {
         next();
     }
 });
 
 export default router;
-
 
 
 

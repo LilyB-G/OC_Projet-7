@@ -1,24 +1,33 @@
 <template>
+
   <div class="container">
     <div class="main-body">
+      <!-- Breadcrumb -->
+      <!-- <nav aria-label="breadcrumb" class="main-breadcrumb">
+               <ol class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                  <li class="breadcrumb-item"><a href="javascript:void(0)">User</a></li> 
+                  <li class="breadcrumb-item active" aria-current="page">User Profile</li>
+               </ol>
+            </nav> -->
+      <!-- /Breadcrumb -->
+
       <div class="row gutters-sm">
         <div class="col-md-12 mb-3">
           <div class="card">
             <div class="card-body">
               <div class="d-flex flex-column align-items-center text-center">
-                <img
-                  src="https://bootdey.com/img/Content/avatar/avatar7.png"
-                  alt="Admin"
-                  class="rounded-circle"
-                  width="150"
-                >
+                <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Admin" class="rounded-circle"
+                  width="150">
                 <div class="mt-3">
-                  <h4>Léo Pard</h4>
+                  <h4>John Doe</h4>
                   <p class="text-secondary mb-1">
-                    Chef de projet
+                    {{user.UserService}}
                   </p>
                   <p class="text-muted font-size-sm">
-                    The Valley, Los Angeles, CA
+                  <div class="role">UserRole</div>
+                  <div class="lastLogin">last login: {{user.UserLastLogin}}</div>
+
                   </p>
                 </div>
               </div>
@@ -31,141 +40,322 @@
               <div class="row">
                 <div class="col-sm-3">
                   <h6 class="mb-0">
-                    Full Name
+                    Name
                   </h6>
                 </div>
                 <div class="col-sm-9 text-secondary">
-                  Léo Pard
+                  <input type="text" v-model="user.UserLogin" @Change="actuChange">
+
                 </div>
               </div>
               <hr>
               <div class="row">
                 <div class="col-sm-3">
                   <h6 class="mb-0">
-                    e-mail professionnel
+                    Email Pro
+                  </h6>
+                </div>
+                <div class="col-sm-9 text-secondary">{{user.UserMailPro}} used as login
+                </div>
+
+              </div>
+              <hr>
+              <div class="row">
+                <div class="col-sm-3">
+                  <h6 class="mb-0">
+                    Email Perso
                   </h6>
                 </div>
                 <div class="col-sm-9 text-secondary">
-                  leo-pard@groupomania.com
+                  <input type="text" v-model="user.UserMailPerso" @Change="actuChange">
+                </div>
+              </div>
+
+              <hr>
+              <div class="row">
+                <div class="col-sm-3">
+                  <h6 class="mb-0">
+                    Phone Pro
+                  </h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                  <input type="text" v-model="user.UserPhonePro" @Change="actuChange">
                 </div>
               </div>
               <hr>
               <div class="row">
                 <div class="col-sm-3">
                   <h6 class="mb-0">
-                    Téléphone professionnel
+                    Phone Perso
                   </h6>
                 </div>
                 <div class="col-sm-9 text-secondary">
-                  06.95.68.33.58
+                  <input type="text" v-model="user.UserPhonePerso" @Change="actuChange">
+                </div>
+                <hr>
+                <div class="row align-items-start">
+                  <table class="table table-borderless">
+                    <thead>
+                      <tr>
+                        <th scope="col">Address</th>
+                        <th scope="col" style="width:10%"></th>
+                        <th scope="col"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+
+                        </td>
+                        <td>
+                          Rue
+                        </td>
+                        <td>
+                          <input type="text" style="width:95%" v-model="user.UserRue" @Change="actuChange">
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+
+                        </td>
+                        <td>
+                          Code postal
+                        </td>
+                        <td>
+                          <input type="text" v-model="user.UserCodePostal" @Change="actuChange">
+                        </td>
+
+                      </tr>
+                      <tr>
+                        <td>
+
+                        </td>
+                        <td>
+                          Ville
+                        </td>
+                        <td>
+                          <input type="text" v-model="user.UserVille" @Change="actuChange">
+                        </td>
+
+                      </tr>
+
+                    </tbody>
+                  </table>
+
                 </div>
               </div>
-              <hr>
-              <!--<div class="row">
-                <div class="col-sm-3">
-                  <h6 class="mb-0">
-                    Téléphone portable
-                  </h6>
-                </div>
-                <div class="col-sm-9 text-secondary">
-                  (320) 380-4539
-                </div>
+            </div>
+            <hr>
+            <div class="row ">
+              <div class="col-sm" v-if="showUpdateBtn">
+                <input class="btn btn-info " @click="updateValue(this.updateUser)" text-content="Update">
+                <hr>
               </div>
-              <hr>
-              <div class="row">
-                <div class="col-sm-3">
-                  <h6 class="mb-0">
-                    Addresse
-                  </h6>
-                </div>
-                <div class="col-sm-9 text-secondary">
-                  The Valley, Los Angeles, CA
-                </div>
-              </div>
-              <hr>-->
-              <!-- <div class="row">
-                           <div class="col-sm-12">
-                              <a class="btn btn-info " target="__blank"
-                                 href="https://www.bootdey.com/snippets/view/profile-edit-data-and-skills">Edit</a>
-                           </div>
-                        </div> -->
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+
 </template>
    
-   <script>
-   
-      
-   export default {
-      
+<script>
+import Axios from 'axios';
+import { heureMin } from '@/services/dateTime'
+
+
+export default {
+
+  data() {
+    return {
+      userSelect: {},
+      user: {},
+      updateUser: [],
+
+    }
+  },
+  provide() {
+    return {
+      user: this.user,
+
+
+    }
+  },
+  mounted() {
+
+    let toUrl = 'http://localhost:3000/auth/getuser';
+    let data = {};
+    let axiosConfig = {
+      headers: {
+        "Content-Type": 'application/json',
+        "Authorization": 'Bearer ' + this.$store.state.auth.token,
+        "Access-Control-Allow-Origin": "*",
+        
+      }
+    };
+    //console.log(toUrl + ' | ' + JSON.stringify(data) + ' | ' + JSON.stringify(axiosConfig.headers));
+
+    if (this.$store.state.auth.token) {
+
+      Axios.post(toUrl, data, axiosConfig)
+        .then((response) => {
+          //console.log("status:" + typeof (response.status) + " | data: " + JSON.stringify(response.data));
+          if (response.status == 200) {
+            //console.log(response.data);
+            this.user = response.data.data;
+            console.log(this.user);
+            Object.assign(this.userSelect, this.user); //copie user pour conserver l'état origine
+
+          } else {
+            console.log('error ' + response.status);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+
+        });
+    }
+  },
+  computed: {
+    showUpdateBtn: function () {
+      if (this.updateUser.length > 0) {
+        return true;
+      } else {
+        return false;
+      }
+
+    },
+    actuChange() {
+      let curStateUser = {};
+      Object.assign(curStateUser, this.user);
+      const asCur = [];
+
+      for (const [key, value] of Object.entries(curStateUser)) {
+        asCur.push(`${key}` + ':' + `${value}`);
+      }
+      //console.log(asCur);
+      const asOri = [];
+      for (const [key, value] of Object.entries(this.userSelect)) {
+        asOri.push(`${key}` + ':' + `${value}`);
+      }
+      //console.log(asOri);
+
+      let filtered = [];
+      for (let i in asCur) {
+        if (asOri[i] != asCur[i]) {
+          filtered.push(asCur[i]);
+        }
+      }
+      this.updateUser = filtered;
+    console.log('filtered: ' + this.updateUser);
      
-   }
+    },
+
+  },
+  methods: {
+
+    updateValue(obj) {
+
+      let toUrl = 'http://localhost:3000/auth/updateuser';
+      let axiosConfig = {
+        headers: {
+          "Content-Type": 'application/json',
+          "Authorization": 'Bearer ' + this.$store.state.auth.token,
+          "Access-Control-Allow-Origin": "*",
+          
+        }
+      };
+
+      //console.log(toUrl + ' | ' + JSON.stringify(data) + ' | ' + JSON.stringify(axiosConfig.headers));
+
+      if (this.$store.state.auth.token) {
+
+        Axios.post(toUrl, obj, axiosConfig)
+          .then((response) => {
+            //console.log("status:" + typeof (response.status) + " | data: " + JSON.stringify(response.data));
+            if (response.status == 200) {
+              //console.log(response.data);
+              this.updateUser = [];
+
+            } else {
+              console.log('error ' + response.status);
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+
+          });
+      }
+
+
+    }
+  },
+
+
+}
+
+</script>
    
-   </script>
-   
-   <style>
-   body {
-      margin-top: 20px;
-      color: #1a202c;
-      text-align: left;
-      background-color: #e2e8f0;
-   }
-   
-   .main-body {
-      padding: 15px;
-   }
-   
-   .card {
-      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, .1), 0 1px 2px 0 rgba(0, 0, 0, .06);
-   }
-   
-   .card {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      word-wrap: break-word;
-      background-color: #fff;
-      background-clip: border-box;
-      border: 0 solid rgba(0, 0, 0, .125);
-      border-radius: .25rem;
-   }
-   
-   .card-body {
-      flex: 1 1 auto;
-      min-height: 1px;
-      padding: 1rem;
-   }
-   
-   .gutters-sm {
-      margin-right: -8px;
-      margin-left: -8px;
-   }
-   
-   .gutters-sm>.col,
-   .gutters-sm>[class*=col-] {
-      padding-right: 8px;
-      padding-left: 8px;
-   }
-   
-   .mb-3,
-   .my-3 {
-      margin-bottom: 1rem !important;
-   }
-   
-   .bg-gray-300 {
-      background-color: #e2e8f0;
-   }
-   
-   .h-100 {
-      height: 100% !important;
-   }
-   
-   .shadow-none {
-      box-shadow: none !important;
-   }
-   </style>
+<style>
+body {
+  margin-top: 20px;
+  color: #1a202c;
+  text-align: left;
+  background-color: #e2e8f0;
+}
+
+.main-body {
+  padding: 15px;
+}
+
+.card {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, .1), 0 1px 2px 0 rgba(0, 0, 0, .06);
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  word-wrap: break-word;
+  background-color: #fff;
+  background-clip: border-box;
+  border: 0 solid rgba(0, 0, 0, .125);
+  border-radius: .25rem;
+}
+
+.card-body {
+  flex: 1 1 auto;
+  min-height: 1px;
+  padding: 1rem;
+}
+
+.gutters-sm {
+  margin-right: -8px;
+  margin-left: -8px;
+}
+
+.gutters-sm>.col,
+.gutters-sm>[class*=col-] {
+  padding-right: 8px;
+  padding-left: 8px;
+}
+
+.mb-3,
+.my-3 {
+  margin-bottom: 1rem !important;
+}
+
+.bg-gray-300 {
+  background-color: #e2e8f0;
+}
+
+.h-100 {
+  height: 100% !important;
+}
+
+.shadow-none {
+  box-shadow: none !important;
+}
+</style>

@@ -97,16 +97,19 @@ import {
   SIGNUP_ACTION,
 } from '@/store/storeconstants';
 
+
 export default {
 
   beforeRouteLeave() {
     console.log('route leaving');
     console.log(this.$store);
+
   },
   beforeRouteEnter(to, from, next) {
     next((vm) => {
       console.log('route entering');
       console.log(vm.$store.state.auth);
+
     });
   },
 
@@ -125,7 +128,7 @@ export default {
       },
       errors: [],
       error: '',
-
+      
     };
   },
 
@@ -140,10 +143,13 @@ export default {
       showLoading: LOADING_SPINNER_SHOW_MUTATION,
     }),
 
+
+
+
     // ---------------------------- Login -------------------------------------
 
     async loginSend() {
-      console.log("submitlogin ok");
+      //console.log("submitlogin ok");
       let validations = new SignupValidations(
         this.formLogin.loginMail,
         this.formLogin.loginPassword,
@@ -158,26 +164,27 @@ export default {
 
       this.showLoading(true);
       //Login check
-      console.log("submitlogin check");
+      //console.log("submitlogin check");
       try {
         await this.login(/*this.$store,*/{
           email: this.formLogin.loginMail,
           password: this.formLogin.loginPassword,
         });
+
+        this.$router.push('/user' ) ;   // route sur '/user'
+        
       } catch (error) {
         this.error = error;
         console.log(error);
-        this.showLoading(false);
+
       }
 
-      this.showLoading(false);
-      //this.$router.push('/User');
     },
 
     // ---------------------------- Signup -------------------------------------
 
     async signupSend() {
-      console.log("submitsignup ok");
+      //console.log("submitsignup ok");
       let validations = new SignupValidations(
         this.formRegister.signupMail,
         this.formRegister.signupPassword,
@@ -197,18 +204,28 @@ export default {
           password: this.formRegister.signupPassword,
           name: this.formRegister.signupName,
         });
+
+
+        this.$router.push('/user' );    // route sur '/User'
+        
       } catch (error) {
         this.error = error;
         console.log(error);
-        this.showLoading(false);
+
       }
-      this.showLoading(false);
-      //make spinner false
+
+
     },
+
+
+
+
+
   },
   components: {
 
-  }
+  },
+
 
 }
 
