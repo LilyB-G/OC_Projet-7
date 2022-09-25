@@ -1,6 +1,6 @@
 <template>
   <NavBar />
-    
+
   <div class="container">
     <div class="row">
       <div class="col-md-12">
@@ -23,8 +23,8 @@ import { AUTO_LOGIN_ACTION } from '@/store/storeconstants';
 
 export default {
   name: 'App',
-  
-   computed: {
+
+  computed: {
     ...mapState({
       autoLogout: (state) => state.auth.autoLogout,
     }),
@@ -36,13 +36,14 @@ export default {
         this.$router.replace('/');
       }
     },
-  }, 
-  
+  },
+
+
   components: {
     NavBar,
-    
-    
-},
+
+
+  },
   created() {
     this.$store.dispatch(`auth/${AUTO_LOGIN_ACTION}`);
   },
@@ -51,9 +52,9 @@ export default {
 </script>
 
 <style>
-  body{
-    background-color: #d0cedc;
-  }
+body {
+  background-color: #d0cedc;
+}
 </style>
 
 

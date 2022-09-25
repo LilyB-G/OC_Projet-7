@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.6",
+    "autosize": "^5.0.1",
     "axios": "^0.27.2",
     "bootstrap": "^5.2.0",
     "bootstrap-vue-3": "^0.2.12",
@@ -21,7 +22,6 @@
     "@babel/core": "^7.12.16",
     "@babel/eslint-parser": "^7.12.16",
     "@vue/cli-plugin-babel": "~5.0.0",
-    "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
     "eslint-plugin-vue": "^8.0.3"
   },
@@ -38,8 +38,9 @@
       "parser": "@babel/eslint-parser"
     },
     "rules": {
-      "no-unused-expressions": 1,
-      "no-unused-vars": 1
+      "no-console": "off",
+      "no-debugger": "off",
+      "no-mixed-spaces-and-tabs": "off"
     }
   },
   "browserslist": [

@@ -8,16 +8,16 @@ require('bluebird');
 router.post('/ini',(req, res, next) => {
     res.status(200).send({'msg':'route reached'});
 } );
-router.post('/sendpost:idowner',(req, res, next) => {
+router.post('/createPost:idowner',(req, res, next) => {
     res.status(200).send({'msg':'route reached'});
 } );
-router.post('/thread:idowner',(req, res, next) => {
+router.post('/updatePost:idowner',(req, res, next) => {
     res.status(200).send({'msg':'route reached'});
 } );
-router.post('/newthread:idowner',(req, res, next) => {
+router.post('/updateThread:idowner',(req, res, next) => {
     res.status(200).send({'msg':'route reached'});
 } );
-router.put('/updatethread:idowner',(req, res, next) => {
+router.post('/CreateThread:idowner',(req, res, next) => {
     res.status(200).send({'msg':'route reached'});
 } );
 router.delete('/deletethread:idowner',(req, res, next) => {
