@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import store from '@/store/store';
-import { IS_USER_AUTHENTICATE_GETTER } from '@/store/storeconstants';
+import { useUserStore } from '@/store/UserStore';
+import { useChatStore } from '@/store/chatStore';
+
 import homePage from '@/views/HomePage.vue';
 import notFound from "@/views/notFound.vue";
 import newsPage from "@/views/NewsPage.vue";
@@ -65,23 +66,39 @@ const router = createRouter({
     ]
 });
 router.beforeEach((to, from, next) => {
-    if (
-        'auth' in to.meta &&
-        to.meta.auth &&
-        !store.getters[`auth/${IS_USER_AUTHENTICATE_GETTER}`]
-    ) {
-        next('/login'); // un profil non authentifié est dirigé sur la page login si tentative d'accès à une page exigeant une authentification
-    } else if (
-        'auth' in to.meta &&
-        !to.meta.auth &&
-        store.getters[`auth/${IS_USER_AUTHENTICATE_GETTER}`]
-    ) {
-        next();      
-    } else {
-        next();
-    }
-});
+    const userStore = useUserStore();
+    const chatStore = useChatStore();
 
+    /*
+        ini var Store
+    */
+        //chatStore.actualRoute(to.path);
+        //console.log(to.path);
+
+    //console.log ('router before userStore.is_authenticated: ' + userStore.is_authenticated);
+    //console.log ('router before to.meta.auth: ' + to.meta.auth);
+    /*
+                redirection 
+   */
+        if ( !userStore.is_authenticated && to.meta.auth == true )
+        {
+            next('/login'); // un profil non authentifié est dirigé sur la page login si tentative d'accès à une page exigeant une authentification
+        } 
+        else
+        {
+            next();
+        }
+    
+}); 
+router.afterEach((to,from,failure)=>{
+    const userStore = useUserStore();
+
+    //console.log ('router after userStore.is_authenticated: ' + userStore.is_authenticated);
+    //console.log ('router after to.meta.auth: ' + to.meta.auth);
+
+})
+
+ 
 export default router;
 
 

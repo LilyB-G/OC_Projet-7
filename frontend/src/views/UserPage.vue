@@ -11,7 +11,7 @@
                </ol>
             </nav> -->
       <!-- /Breadcrumb -->
-
+      
       <div class="row gutters-sm">
         <div class="col-md-12 mb-3">
           <div class="card">
@@ -20,13 +20,13 @@
                 <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Admin" class="rounded-circle"
                   width="150">
                 <div class="mt-3">
-                  <h4>John Doe</h4>
+                  <h4>{{user.UserLogin}}</h4>
                   <p class="text-secondary mb-1">
-                    {{user.UserService}}
+                    <hr>
                   </p>
                   <p class="text-muted font-size-sm">
-                  <div class="role">UserRole</div>
-                  <div class="lastLogin">last login: {{user.UserLastLogin}}</div>
+                  <div class="role" >{{user.UserService}}</div>
+                  <div class="lastLogin">last login: {{heureMin(user.UserLastLogin)}}</div>
 
                   </p>
                 </div>
@@ -44,7 +44,7 @@
                   </h6>
                 </div>
                 <div class="col-sm-9 text-secondary">
-                  <input type="text" v-model="user.UserLogin" @Change="actuChange">
+                  <input type="text" v-model="user.UserLogin" >
 
                 </div>
               </div>
@@ -67,7 +67,7 @@
                   </h6>
                 </div>
                 <div class="col-sm-9 text-secondary">
-                  <input type="text" v-model="user.UserMailPerso" @Change="actuChange">
+                  <input type="text" v-model="user.UserMailPerso" >
                 </div>
               </div>
 
@@ -79,7 +79,7 @@
                   </h6>
                 </div>
                 <div class="col-sm-9 text-secondary">
-                  <input type="text" v-model="user.UserPhonePro" @Change="actuChange">
+                  <input type="text" v-model="user.UserPhonePro" >
                 </div>
               </div>
               <hr>
@@ -90,7 +90,7 @@
                   </h6>
                 </div>
                 <div class="col-sm-9 text-secondary">
-                  <input type="text" v-model="user.UserPhonePerso" @Change="actuChange">
+                  <input type="text" v-model="user.UserPhonePerso" >
                 </div>
                 <hr>
                 <div class="row align-items-start">
@@ -111,7 +111,7 @@
                           Rue
                         </td>
                         <td>
-                          <input type="text" style="width:95%" v-model="user.UserRue" @Change="actuChange">
+                          <input type="text" style="width:95%" v-model="user.UserRue" >
                         </td>
                       </tr>
                       <tr>
@@ -122,7 +122,7 @@
                           Code postal
                         </td>
                         <td>
-                          <input type="text" v-model="user.UserCodePostal" @Change="actuChange">
+                          <input type="text" v-model="user.UserCodePostal" >
                         </td>
 
                       </tr>
@@ -134,7 +134,7 @@
                           Ville
                         </td>
                         <td>
-                          <input type="text" v-model="user.UserVille" @Change="actuChange">
+                          <input type="text" v-model="user.UserVille" >
                         </td>
 
                       </tr>
@@ -147,153 +147,155 @@
             </div>
             <hr>
             <div class="row ">
-              <div class="col-sm" v-if="showUpdateBtn">
-                <input class="btn btn-info " @click="updateValue(this.updateUser)" text-content="Update">
-                <hr>
+              <div class="btn btn-dark" v-if="showUpdateBtn.active" @click="updateValue(updateUser)">
+                      Update                
               </div>
+              <hr>
             </div>
           </div>
         </div>
       </div>
     </div>
+    
   </div>
 
 </template>
    
-<script>
+<script setup>
 import Axios from 'axios';
+import { useUserStore } from '@/store/UserStore';
+
+import { ref, watch, reactive } from 'vue';
 import { heureMin } from '@/services/dateTime'
 
+const userStore = useUserStore();
 
-export default {
 
-  data() {
-    return {
-      userSelect: {},
-      user: {},
-      updateUser: [],
+const userSelect = {};
+const user = reactive({});
+const updateUser = {};
 
+
+const showUpdateBtn = reactive({active:false});
+
+/*
+  get user data
+*/  
+
+  const toUrl = 'http://localhost:3000/auth/getuser';
+  const data = {};                                            // pas de data envoyé pour un select
+  const axiosConfig = {
+    headers: {
+      "Content-Type": 'application/json',
+      "Authorization": 'Bearer ' + userStore.token,
+      "Access-Control-Allow-Origin": "*",
+      
     }
-  },
-  provide() {
-    return {
-      user: this.user,
-
-
-    }
-  },
-  mounted() {
-
-    let toUrl = 'http://localhost:3000/auth/getuser';
-    let data = {};
-    let axiosConfig = {
-      headers: {
-        "Content-Type": 'application/json',
-        "Authorization": 'Bearer ' + this.$store.state.auth.token,
-        "Access-Control-Allow-Origin": "*",
-        
-      }
-    };
-    //console.log(toUrl + ' | ' + JSON.stringify(data) + ' | ' + JSON.stringify(axiosConfig.headers));
-
-    if (this.$store.state.auth.token) {
-
-      Axios.post(toUrl, data, axiosConfig)
-        .then((response) => {
-          //console.log("status:" + typeof (response.status) + " | data: " + JSON.stringify(response.data));
-          if (response.status == 200) {
-            //console.log(response.data);
-            this.user = response.data.data;
-            console.log(this.user);
-            Object.assign(this.userSelect, this.user); //copie user pour conserver l'état origine
-
-          } else {
-            console.log('error ' + response.status);
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-
-        });
-    }
-  },
-  computed: {
-    showUpdateBtn: function () {
-      if (this.updateUser.length > 0) {
-        return true;
-      } else {
-        return false;
-      }
-
-    },
-    actuChange() {
-      let curStateUser = {};
-      Object.assign(curStateUser, this.user);
-      const asCur = [];
-
-      for (const [key, value] of Object.entries(curStateUser)) {
-        asCur.push(`${key}` + ':' + `${value}`);
-      }
-      //console.log(asCur);
-      const asOri = [];
-      for (const [key, value] of Object.entries(this.userSelect)) {
-        asOri.push(`${key}` + ':' + `${value}`);
-      }
-      //console.log(asOri);
-
-      let filtered = [];
-      for (let i in asCur) {
-        if (asOri[i] != asCur[i]) {
-          filtered.push(asCur[i]);
-        }
-      }
-      this.updateUser = filtered;
-    console.log('filtered: ' + this.updateUser);
+  };
+  if (userStore.token) {    
      
-    },
+          Axios.post(toUrl, data, axiosConfig)
+              .then ((res) => {
+                  if(res.status == 200){
+                    //console.log (res.data);
+                    Object.assign(user,res.data.data);
+                    Object.assign(userSelect, res.data.data);   // copie originale
+                    //console.log (user.UserLogin) ;
+                  }
+                  else if (res.status in ['400','401','402']) {
+                    console.log ( 'unauthorized');
+                  }
+                  else
+                  {
+                    console.log ( 'other error');
+                  }
+              })
+              .catch((err) => {
+                console.log (err);
+              })   
+    
+  } 
+  else 
+  {
+    console.log('error ' + 'unautorized');
+  };
 
-  },
-  methods: {
 
-    updateValue(obj) {
 
-      let toUrl = 'http://localhost:3000/auth/updateuser';
-      let axiosConfig = {
-        headers: {
-          "Content-Type": 'application/json',
-          "Authorization": 'Bearer ' + this.$store.state.auth.token,
-          "Access-Control-Allow-Origin": "*",
-          
+const updateValue = (obj) => {
+
+  let toUrl = 'http://localhost:3000/auth/updateuser';
+  let axiosConfig = {
+    headers: {
+      "Content-Type": 'application/json',
+      "Authorization": 'Bearer ' + userStore.token,
+      "Access-Control-Allow-Origin": "*",
+      
+    }
+  };
+
+  //console.log(toUrl + ' | ' + JSON.stringify(data) + ' | ' + JSON.stringify(axiosConfig.headers));
+
+  if (userStore.token) {
+
+    Axios.post(toUrl, obj, axiosConfig)
+      .then((response) => {
+        //console.log("status:" + typeof (response.status) + " | data: " + JSON.stringify(response.data));
+        if (response.status == 200) {
+          //console.log(response.data);
+          raz();
+
+        } else {
+          console.log('error ' + response.status);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+
+      });
+  }
+};
+
+
+
+const raz= () => {
+    showUpdateBtn.active = false;   // gérer le retour à l'origine
+    updateUser.length = 0;        // vider le array
+};
+
+watch(user,(currentValue,oldValue ) => {
+
+  if (userSelect != currentValue){
+    
+    for (const obj of Object.entries(user)) {
+      
+      if ( obj[1] != [ 'userSelect.'+`$obj[0]`] && obj[0]!= 'UserLastLogin' && obj[1] != null){
+        const newV = user[obj[0]];
+        const oldV = userSelect[obj[0]];
+
+        if ( newV != oldV ) {
+          console.log ('key: '+ obj[0] + ' currentValue : ' + newV + ', oldvalue : ' + oldV );
+          console.log (obj);
+        showUpdateBtn.active = true;
+
+        let Key = obj[0];
+        let Val = obj[1];
+
+        Object.assign(updateUser, { [Key] : Val });   // construction du tableau de mise à jour
         }
       };
+      
+    };
 
-      //console.log(toUrl + ' | ' + JSON.stringify(data) + ' | ' + JSON.stringify(axiosConfig.headers));
-
-      if (this.$store.state.auth.token) {
-
-        Axios.post(toUrl, obj, axiosConfig)
-          .then((response) => {
-            //console.log("status:" + typeof (response.status) + " | data: " + JSON.stringify(response.data));
-            if (response.status == 200) {
-              //console.log(response.data);
-              this.updateUser = [];
-
-            } else {
-              console.log('error ' + response.status);
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-
-          });
-      }
+    console.log (updateUser);
+  
+  } else if (userSelect === currentValue) {
+    raz();
+  };
+  
+});
 
 
-    }
-  },
-
-
-}
 
 </script>
    
@@ -307,6 +309,7 @@ body {
 
 .main-body {
   padding: 15px;
+  margin-bottom: 20px;
 }
 
 .card {

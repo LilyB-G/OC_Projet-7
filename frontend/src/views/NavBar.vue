@@ -14,7 +14,7 @@
       <div id="navbarCollapse" class="collapse navbar-collapse">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <router-link class="nav-link active" to="/Home">
+            <router-link class="nav-link active" to="/home">
               Home
             </router-link>
           </li>
@@ -51,9 +51,9 @@
           </li>
           <li>
 
-            <div class="logout" v-if="showLogout_btn">
-
-              <button type="button" id="logout_btn" class="btn btn-dark" @click="onlogout">logout</button>
+            <div class="logout" >
+              <button type="button" id="logout_btn" class="btn btn-dark" v-if="!showLogout_btn" disabled >unlogged</button>
+              <button type="button" id="logout_btn" class="btn btn-dark" v-if="showLogout_btn" @click="logout">logout</button>
 
             </div>
 
@@ -62,59 +62,42 @@
       </div>
     </div>
   </nav>
+  
 
 </template>
 
-<script>
-import { mapActions } from 'vuex';
-import { AUTO_LOGOUT_ACTION } from '@/store/storeconstants';
+<script setup>
+import {useUserStore} from '@/store/UserStore';
+import { useRouter } from 'vue-router';
+import { computed } from 'vue';
 
+const router = useRouter();
+const userStore = useUserStore();
 
-export default {
+let showLogout_btn = false;
 
+function logout(){
+      userStore.token = '';
+      userStore.userId = '';
+      userStore.expiresIn = 0;
+      userStore.lastLogin = '';
+      userStore.msg='';
+      showLogout_btn = false;
+      router.push('/'); 
+  };
 
-  data() {
-    return {
-      userId: '',
-      is_auth: false,
-      showLogout_btn: false,
-    }
-  },
+showLogout_btn = computed(() => {
+  return userStore.is_authenticated;
+});
 
-  methods: {
-    ...mapActions('auth', {
-      autoLogout: AUTO_LOGOUT_ACTION,
-    }),
-    onlogout() {
-      console.log("exit login ok");
+/* router.beforeEach((to)=>{
 
-      this.autoLogout();
-      this.showLogout_btn = false
+  const userStore = useUserStore();
+  showLogout_btn = userStore.is_authenticated;
+  console.log ('is_Auth on route before ?:' + userStore.is_authenticated );
 
-    },
-    showLogout() {
-      if (localStorage.getItem('userData') !== 'null') {
-        //console.log('spasse un truk')
-        try {
-          if (JSON.parse(localStorage.getItem('userData')).token.length > 0) {
-            this.showLogout_btn = true;
-            this.is_auth = true;
-            this.userId = JSON.parse(localStorage.getItem('userData')).userId;
-          }
-        } catch (error) {
-          this.showLogout_btn = false;
-          this.is_auth = false;
-          this.userId = '';
-        }
-
-      }
-
-    }
-
-  },
-
-
-}
+});
+ */
 
 </script>
   

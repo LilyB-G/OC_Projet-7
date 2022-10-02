@@ -1,41 +1,35 @@
 <template>
-    <div class="container border bg-light " >
+    <div class="container border bg-light ">
         <div class="d-flex">
-            <div v-if=" props.modelValue == 'create' ">
+
+            <div v-if=" chatStore.action == 'create' ">
                 <createTools /> <!-- vue components tools create -->
             </div>
-            <div v-if=" props.modelValue == 'update' ">
+            <div v-if=" chatStore.action == 'update' ">
                 <updateTools /> <!-- vue components tools update -->
             </div>
         </div>
         <div>
-            <textarea ref="el"
-                class="block w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-blue-400 focus:ring-blue-400"
-                v-if = "props.modelValue == 'create'" v-model="blankMessage"> 
-            </textarea>
-            
-            <textarea ref="el"
-                class="block w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-blue-400 focus:ring-blue-400"
-                v-if ="props.modelValue == 'update'" v-model="message" > 
+            <textarea ref="textarea"
+                class="block w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-blue-400 focus:ring-blue-400" v-model="chatStore.content">
+
             </textarea>
         </div>
         <div class="d-flex justify-content-end align-items">
-            <div v-if=" props.modelValue == 'create' " >
-                                           
-                    <div><createAction v-model="message" /></div> <!-- vue components action create -->
-                
-                    <button type="button" class="btn btn-secondary" @click="close">Abort</button>
-       
+            <div v-if=" chatStore.action == 'create' ">
+                <button type="button" class="btn btn-danger" @click="chatStore.postInsert">Send</button>
+                <button type="button" class="btn btn-secondary" @click="close">Abort</button>
+
             </div>
-            <div v-if=" props.modelValue == 'update' ">
-                <updateAction v-model="message" /> <!-- vue components action update -->
+            <div v-if=" chatStore.action == 'update' ">
+                <button type="button" class="btn btn-danger" @click="chatStore.postUpdate">Actualize</button>
                 <button type="button" class="btn btn-secondary" @click="close">Abort</button>
             </div>
 
         </div>
     </div>
     <br>
-    
+
 
 </template>
 
@@ -45,37 +39,26 @@
 /*
  import
 */
-import { onBeforeUnmount, onMounted, ref, watch, inject, computed, reactive , provide, onUpdated } from "vue";
+import { ref } from "vue";
 
-import autosize from "autosize/dist/autosize";
-import createAction from '@/components/forms/createActions.vue';
-import updateAction from '@/components/forms/updateActions.vue';
+import {useAutoresizeTextarea} from "@/components/resizeTextArea";
 import createTools from '@/components/forms/createTools.vue';
 import updateTools from '@/components/forms/updateTools.vue';
+import { useChatStore } from '@/store/chatStore';
 
 
-/*
-props
-*/
+//pinia Storage access
 
-const props = defineProps({
-    modelValue : String,  // post action = create / update
-})
+const chatStore = useChatStore();
 
-// valeurs provide - inject héritées de ChatPage
+const textarea = ref();
+useAutoresizeTextarea(textarea);
 
 
-/* let action = ref('');
-action = inject("PostAction");  */
-
-const emit = defineEmits(['PostForm.show']);
-
-let message = inject("OriginalContent") ;
-let blankMessage =  'test '
 
 /*
 autosize text area
-*/
+
 const el = ref();
 
 onMounted(() => {
@@ -89,14 +72,12 @@ onMounted(() => {
 onBeforeUnmount(() => autosize.destroy(el.value));
 
 
-/*
 show this form
 */
 
-function close(){
-    emit('PostForm.show', false);
-    console.log( 'action close');
-    
+
+function close() {
+    chatStore.action = '';
 };
 
 

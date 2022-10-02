@@ -18,22 +18,18 @@
                         Log In
                       </h4>
                       <div class="form-group">
-                        <input id="logemail" v-model="formLogin.loginMail" type="loginEmail" name="logemail"
+                        <input id="logemail" v-model="payload.login" type="loginEmail" name="logemail"
                           class="form-style" placeholder="Your Email" autocomplete="off">
                         <i class="input-icon uil uil-at" />
-                        <div v-if="errors.email" class="error">
-                          {{ errors.email }}
-                        </div>
+                        
                       </div>
                       <div class="form-group mt-2">
-                        <input id="logpass" v-model="formLogin.loginPassword" type="loginPassword" name="logpass"
+                        <input id="logpass" v-model="payload.password" type="loginPassword" name="logpass"
                           class="form-style" placeholder="Your Password" autocomplete="off">
                         <i class="input-icon uil uil-lock-alt" />
-                        <div v-if="errors.password" class="error">
-                          {{ errors.password }}
-                        </div>
+                        
                       </div>
-                      <button class="btn mt-4" @click="loginSend">
+                      <button class="btn mt-4" @click="Login">
                         login
                       </button>
 
@@ -51,27 +47,23 @@
                         Sign Up
                       </h4>
                       <div class="form-group">
-                        <input id="logname" v-model="formRegister.signupName" type="signupName" name="logname"
+                        <input id="logname" v-model="payload.pseudo" type="signupName" name="logname"
                           class="form-style" placeholder="Your Full Name" autocomplete="off">
                         <i class="input-icon uil uil-user" />
                       </div>
                       <div class="form-group mt-2">
-                        <input id="logemail" v-model="formRegister.signupMail" type="signupEmail" name="logemail"
+                        <input id="logemail" v-model="payload.login" type="signupEmail" name="logemail"
                           class="form-style" placeholder="Your Email" autocomplete="off">
                         <i class="input-icon uil uil-at" />
-                        <div v-if="errors.email" class="error">
-                          {{ errors.email }}
-                        </div>
+                        
                       </div>
                       <div class="form-group mt-2">
-                        <input id="logpass" v-model="formRegister.signupPassword" type="signupPassword" name="logpass"
+                        <input id="logpass" v-model="payload.password" type="signupPassword" name="logpass"
                           class="form-style" placeholder="Your Password" autocomplete="off">
                         <i class="input-icon uil uil-lock-alt" />
-                        <div v-if="errors.password" class="error">
-                          {{ errors.password }}
-                        </div>
+                        
                       </div>
-                      <button class="btn mt-4" @click="signupSend">
+                      <button class="btn mt-4" @click="Signup">
                         signup
                       </button>
 
@@ -87,147 +79,84 @@
   </main>
 </template>
 
-<script>
+<script setup>
 
-import { mapActions, mapMutations } from 'vuex';
-import SignupValidations from '@/services/SignupValidations';
-import {
-  LOADING_SPINNER_SHOW_MUTATION,
-  LOGIN_ACTION,
-  SIGNUP_ACTION,
-} from '@/store/storeconstants';
+import { useUserStore } from '@/store/UserStore';
+import { useRouter, useRoute } from 'vue-router';
+
+const router = useRouter();
+const route = useRoute();
+const userStore = useUserStore();
+
+let toRoute = '';
+try {
+    toRoute = route.redirectedFrom.path ;
+} catch (error){
+
+};
+
+function pushTo(route) { router.push(route)}
 
 
-export default {
-
-  beforeRouteLeave() {
-    console.log('route leaving');
-    console.log(this.$store);
-
-  },
-  beforeRouteEnter(to, from, next) {
-    next((vm) => {
-      console.log('route entering');
-      console.log(vm.$store.state.auth);
-
-    });
-  },
 
   // Login --------------------------
-  data() {
-    return {
-      formRegister: {
-        signupName: "",
-        signupMail: "",
-        signupPassword: "",
-
-      },
-      formLogin: {
-        loginMail: "",
-        loginPassword: "",
-      },
-      errors: [],
-      error: '',
-      
-    };
-  },
-
-  methods: {
-
-    ...mapActions('auth', {
-      login: LOGIN_ACTION,
-      signup: SIGNUP_ACTION,
-    }),
-
-    ...mapMutations({
-      showLoading: LOADING_SPINNER_SHOW_MUTATION,
-    }),
-
-
-
+  const payload = {
+        login: "aaaa@aa.al",
+        password: "aaaa",
+        pseudo:"",
+      };
+            
+  
+  
 
     // ---------------------------- Login -------------------------------------
 
-    async loginSend() {
-      //console.log("submitlogin ok");
-      let validations = new SignupValidations(
-        this.formLogin.loginMail,
-        this.formLogin.loginPassword,
-
-      );
-
-      let errors = validations.checkValidations();
-      if (this.errors.length) {
-        return false;
-      }
-      this.error = '';
-
-      this.showLoading(true);
-      //Login check
-      //console.log("submitlogin check");
+    function Login() {
+      
+      
       try {
-        await this.login(/*this.$store,*/{
-          email: this.formLogin.loginMail,
-          password: this.formLogin.loginPassword,
+        userStore.login({
+          email: payload.login,
+          password: payload.password,
         });
 
-        this.$router.push('/user' ) ;   // route sur '/user'
+        pushTo( toRoute );    // route sur destination demandée
         
       } catch (error) {
-        this.error = error;
+        
         console.log(error);
+
+        pushTo( '/home' );    // route sur homePage
 
       }
 
-    },
+    };
 
     // ---------------------------- Signup -------------------------------------
 
-    async signupSend() {
-      //console.log("submitsignup ok");
-      let validations = new SignupValidations(
-        this.formRegister.signupMail,
-        this.formRegister.signupPassword,
-      );
-
-      let errors = validations.checkValidations();
-      if ('email' in this.errors || 'password' in this.errors) {
-        return false;
-      }
-      //make spinner true
-      this.showLoading(true);
-      //signup registration
-      console.log("submitsignup insert");
+    function Signup() {
+      
+      
       try {
-        await this.signup(/*this.$store,*/{
-          email: this.formRegister.signupMail,
-          password: this.formRegister.signupPassword,
-          name: this.formRegister.signupName,
+        userStore.signup({
+          email: payload.login,
+          password: payload.password,
+          name: payload.pseudo,
         });
 
-
-        this.$router.push('/user' );    // route sur '/User'
         
+        pushTo( toRoute );    // route sur destination demandée
+
       } catch (error) {
-        this.error = error;
+        
         console.log(error);
+
+        pushTo( '/home' );    // route sur homePage
 
       }
 
 
-    },
-
-
-
-
-
-  },
-  components: {
-
-  },
-
-
-}
+    };
 
 
 
