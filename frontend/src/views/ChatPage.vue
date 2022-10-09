@@ -1,82 +1,58 @@
 <template>
-    
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <sideMenu />
-                
-                <div class="d-flex">
-                    <div class="card mb-3 m-auto">
-                        <div class="card-header">
-                            <img src="https://bootdey.com/img/Content/avatar/avatar7.png" class="rounded-circle"
-                                alt="Avatar">
-                            <input class="form-control" readonly v-model="chatStore.ori">
-                            <button type="button" class="btn btn-outline-danger ms-5"
-                                @click="chatStore.action = 'update'">Répondre</button>
-
-                        </div>
-                        <img src="https://picsum.photos/400/200" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Card title</h5>
-                            <p class="card-text">This is a wider card with supporting text below as a natural lead-in to
-                                additional
-                                content. This content is a little bit longer.</p>
-                            <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-                        </div>
-                    </div>
-                </div>
-
+    <div class="card w-100 messages" v-for="message in chatStore.Chat.data">
+        <div class="card-header">
+            <img src="https://bootdey.com/img/Content/avatar/avatar7.png" class="rounded-circle" alt="Avatar">
+            <div class="Head">
+                {{message.DateCreation}} {{message.DateUpdate}}
             </div>
+            <button type="button" class="btn btn-outline-danger ms-5"
+                @click="chatStore.action = 'answer'">Répondre</button>
+            <button type="button" class="btn btn-outline-danger ms-5"
+                @click="formUpdate( message.IdThread ) " v-if="userStore.userId == message.IdUser">Update</button>    
+        </div>
+        <img src="https://picsum.photos/400/200" class="card-img-top" alt="...">
+        <div class="card-body">
+            <!-- <h5 class="card-title">Card title</h5> -->
+            <p class="card-text">{{message.ThreadMessage}}</p>
+            <p class="card-text"><small class="text-muted">{{message.DateUpdate}}</small></p>
         </div>
     </div>
-
-    <router-view />
 
 </template>
   
 <script setup>
 
-import sideMenu from '@/components/SideMenu.vue';
+
 //import textAreaAutosize from '@/components/TextAreaAutosize.vue';
 import { useChatStore } from '@/store/chatStore';
 import { useUserStore } from '@/store/UserStore';
-import { onMounted } from "vue";
 
 
 
 const Query = require('@/components/genericQuery');
+
+
 
 //pinia Storage access
 
 const chatStore = useChatStore();
 const userStore = useUserStore();
 
-    onMounted(() => {
+
+    // alimenter chatStore.userId
+    chatStore.userId = userStore.userId;
+
+    // charger les posts
+    chatStore.get(userStore.token);
+
+    // ini variables
 
 
-        // charger les posts
-        const obj = {};
-        const routeToBack = '/chat/all';
-        const Method = 'post';
-        chatStore.userId = userStore.userId;
-
-        const response = Query.postQuery(obj, routeToBack, Method);
-        if (response == undefined) {
-            console.log('backend unreachable ');
-
-        } else {
-            if (response.status == 200) {
-
-                //chat = response.data;
-            } else {
-                console.log(response.status);
-            }
-        }
-
-        // ini variables
-    });
-
-
+function formUpdate(idThread){
+    chatStore.threadEdited = idThread;
+    chatStore.action = 'update';
+    
+}
 
 
 

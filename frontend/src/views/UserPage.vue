@@ -207,7 +207,7 @@ const showUpdateBtn = reactive({active:false});
                   }
                   else
                   {
-                    console.log ( 'other error');
+                    console.log (res.status);
                   }
               })
               .catch((err) => {
@@ -287,7 +287,7 @@ watch(user,(currentValue,oldValue ) => {
       
     };
 
-    console.log (updateUser);
+    //console.log (updateUser);
   
   } else if (userSelect === currentValue) {
     raz();
