@@ -1,6 +1,7 @@
 
 import { defineStore } from 'pinia'
 import { yearMonthDateTime } from '@/services/dateTime'
+import Axios from 'axios';
 
 const Query = require('@/components/genericQuery');
 
@@ -19,57 +20,129 @@ export const useChatStore = defineStore({
         userId: '',
         userName: '',
         dateCreation: '',
+        Chat:{},
+        threadEdited:'',
     }),
     actions: {
 
         closeShowForm() {
             this.showForm = false;
         },
-        postInsert() {
-            const obj = {
-                data: {
-                    content: this.content,
-                    userId: this.userId,
-                    files: this.files,
-                    dateCreation: yearMonthDateTime(),
 
-                },
-            };
-            const routeToBack = '/createPost';
-            const Method = 'POST';
+        get(token) {
 
-            console.log(obj);
-            const response = Query.postQuery(obj, routeToBack, Method);
-            if (response) {
-                if (response.status == 200) {
-                    console.log(response.status);
-                } else if (response.status != 200) {
-                    console.log(response.status);
-                }
-                else {
-                    console.log(response);
-                }
+            const data = {};
+            const toUrl = 'http://localhost:3000/threads/allchat';
+            const axiosConfig = {
+              headers: {
+                "Content-Type": 'application/json',
+                "Authorization": 'Bearer ' + token,
+                "Access-Control-Allow-Origin": "*",
+                
+              }
             };
+
+            if (token) {
+
+              Axios.post(toUrl, data, axiosConfig)
+                .then((response) => {
+                  //console.log("status:" + typeof (response.status) + " | data: " + JSON.stringify(response.data));
+                  if (response.status == 200) {
+                    //console.log(response.data);
+                    
+                    this.Chat = response.data;
+          
+                  } else {
+                    console.log('error ' + response.status);
+                  }
+                })
+                .catch((error) => {
+                  console.log(error);
+          
+                });
+            }
 
         },
-        postUpdate() {
-            const obj = {
-                content: this.content,
-                files: this.files,
+        postInsert(token) {
+            const data = {
+                data: {
+                    ThreadMessage: this.content,
+                    idUser: this.userId,
+                    ThreadFichiersJoints: this.files,
+                    DateCreation : yearMonthDateTime(),
+                    action: this.action,
+                },
             };
-            const routeToBack = '/updatePost';
-            const Method = 'POST';
+            const toUrl = 'http://localhost:3000/threads/createpost';
+            const axiosConfig = {
+                headers: {
+                  "Content-Type": 'application/json',
+                  "Authorization": 'Bearer ' + token,
+                  "Access-Control-Allow-Origin": "*",
+                  
+                }
+              };
+
+              if (token) {
+
+                Axios.post(toUrl, data, axiosConfig)
+                  .then((response) => {
+                    //console.log("status:" + typeof (response.status) + " | data: " + JSON.stringify(response.data));
+                    if (response.status == 200) {
+                      //console.log(response.data);
+                      alert('post created successfully')
+                      this.action = '';
+                      get(token); // recharger la page
+            
+                    } else {
+                      console.log('error ' + response.status);
+                    }
+                  })
+                  .catch((error) => {
+                    console.log(error);
+            
+                  });
+              }
+
+        },
+        postUpdate(token,idThread) {
+            const data = {
+              ThreadMessage: this.content,
+              ThreadFichiersJoints: this.files,
+              IdThread : idThread,
+              DateUpdate : yearMonthDateTime(),
+                };
+            const toUrl = 'http://localhost:3000/threads/updatepost';
+            const axiosConfig = {
+                headers: {
+                  "Content-Type": 'application/json',
+                  "Authorization": 'Bearer ' + token,
+                  "Access-Control-Allow-Origin": "*",
+                  
+                }
+              };
 
             //console.log(obj);
-            const response = Query.postQuery(obj, routeToBack, Method);
-            if (response.status == 200) {
-                console.log(response.status);
-            } else if (response.status != 200) {
-                console.log(response.status);
-            }
-            else {
-                console.log(response);
-            }
+            if (token) {
+
+                Axios.post(toUrl, data, axiosConfig)
+                  .then((response) => {
+                    //console.log("status:" + typeof (response.status) + " | data: " + JSON.stringify(response.data));
+                    if (response.status == 200) {
+                      //console.log(response.data);
+                      alert('update send successfully')
+                      this.action = '';
+                      get(token); // recharger la page
+                    } else {
+                      console.log('error ' + response.status);
+                    }
+                  })
+                  .catch((error) => {
+                    console.log(error);
+            
+                  });
+              }
+
 
 
         },
@@ -81,7 +154,7 @@ export const useChatStore = defineStore({
     },
     getters: {
         postAction: (state) => {
-            if (state.action == 'update' || state.action == 'create') {
+            if (state.action.includes('update') || state.action == 'create') {
                 state.showForm = true;
 
             } else {
@@ -90,9 +163,19 @@ export const useChatStore = defineStore({
             return state.showForm;
         },
         postContent: (state) => {
-            if (state.ori != '') {
-                state.content = state.ori;
+            if (state.action == 'update') {
+              const array = state.Chat.data;
+              const currentThread = state.threadEdited;
+              
+              for (let obj of array){
+                if (obj.IdThread == currentThread ){
+                state.content = obj.ThreadMessage;
+                };
+              
             }
+          }else{
+            state.content = '';
+          }
         },
 
     }
