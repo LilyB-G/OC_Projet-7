@@ -1,28 +1,34 @@
 <template>
-    <div class="container border bg-light ">
+    <div class="container border bg-light fixed-top">
         <div class="d-flex">
 
             <div v-if=" chatStore.action == 'create' ">
                 <createTools /> <!-- vue components tools create -->
             </div>
-            <div v-if=" chatStore.action == 'update' ">
+            <div v-if=" chatStore.action.includes('update') ">
                 <updateTools /> <!-- vue components tools update -->
             </div>
         </div>
-        <div>
+        <div v-if=" chatStore.action == 'create'">
             <textarea ref="textarea"
                 class="block w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-blue-400 focus:ring-blue-400" v-model="chatStore.content">
-
             </textarea>
+            
         </div>
+        <div v-if=" chatStore.action == 'update'">
+            <textarea ref="textarea"
+                class="block w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-blue-400 focus:ring-blue-400" v-model="chatStore.content">
+            </textarea>
+            
+        </div>    
         <div class="d-flex justify-content-end align-items">
             <div v-if=" chatStore.action == 'create' ">
-                <button type="button" class="btn btn-danger" @click="chatStore.postInsert">Send</button>
+                <button type="button" class="btn btn-danger" @click="insert">Send</button>
                 <button type="button" class="btn btn-secondary" @click="close">Abort</button>
 
             </div>
-            <div v-if=" chatStore.action == 'update' ">
-                <button type="button" class="btn btn-danger" @click="chatStore.postUpdate">Actualize</button>
+            <div v-if=" chatStore.action.includes( 'update' ) ">
+                <button type="button" class="btn btn-danger" @click="update">Actualize</button>
                 <button type="button" class="btn btn-secondary" @click="close">Abort</button>
             </div>
 
@@ -45,42 +51,30 @@ import {useAutoresizeTextarea} from "@/components/resizeTextArea";
 import createTools from '@/components/forms/createTools.vue';
 import updateTools from '@/components/forms/updateTools.vue';
 import { useChatStore } from '@/store/chatStore';
+import { useUserStore } from "@/store/UserStore";
 
 
 //pinia Storage access
 
 const chatStore = useChatStore();
+const userStore = useUserStore();
 
 const textarea = ref();
 useAutoresizeTextarea(textarea);
-
-
-
-/*
-autosize text area
-
-const el = ref();
-
-onMounted(() => {
-    autosize(el.value);
-    
-    //console.log('textAreaAutosize.vue message: ' + message.content);
-
-});
-
-
-onBeforeUnmount(() => autosize.destroy(el.value));
-
-
-show this form
-*/
 
 
 function close() {
     chatStore.action = '';
 };
 
-
+function insert(){
+    chatStore.postInsert(userStore.token);
+    
+};
+function update(){
+    chatStore.postUpdate(userStore.token,chatStore.threadEdited);
+    
+};
 
 </script>
     
