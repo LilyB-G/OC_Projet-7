@@ -91,7 +91,7 @@ router.post('/login', (req, res, next) => {
 
                     dbquery.updateOneEntrie(table, data, condition);
 
-                    col = '`UserId`,`UserLastLogin`';
+                    col = '`UserId`,`UserLastLogin`,`UserService`';
                     table = 'Users';
                     condition = '`UserId` = ' + result[0].UserId;
                     dbquery.getOneEntrie(col, table, condition)
@@ -157,7 +157,8 @@ router.post('/getuser', (req, res, next) => {
 
         dbquery.getEntries(table, condition)
             .then((resolve) => {
-                res.status(200).json({ msg: 'select returned', data: resolve[0] });
+                const data = resolve[0];
+                res.status(200).json({ msg: 'select returned', data  });
 
             })
             .catch((reject) => {
@@ -197,18 +198,24 @@ router.post('/updateuser', (req, res, next) => {
 
         let table = 'Users';
         let condition = 'UserPassword = ' + "'" + decoded.tokenid + "'"; // id créé avec tokenid = hashed userPassword
-        console.log(req.body);
+        console.log('req.body :' + req.body);
         let data = '';
         let i = 0;
-        for (let tuple of req.body) {
-            let col = tuple.substring(0, tuple.indexOf(':'));
-            let val = tuple.substring(tuple.indexOf(':')+1, tuple.length);
-             data =  data + '\`' + col + '\`' + " = " + '\''+ val + '\'' ;  
-            i++;
-            if (i != req.body.length) {
+
+        for (let obj in req.body) {
+            let col = obj;
+            let val = req.body[obj];
+            
+            if (i > 0 ) {
+                
                 data = data + ' , ';
-            }           
+            }     
+
+            data =  data + '\`' + col + '\`' + " = " + '\''+ val + '\'' ; 
+            i++;
+            
         }
+        //console.log ('data: ' + data);
         
         dbquery.updateOneEntrie(table, data, condition)
             .then((resolve) => {

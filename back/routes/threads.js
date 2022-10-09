@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 const date = require('../services/dateTime');
 const dbquery = require('../services/dbAction');
-const db = require('../services/dbConnection');
+const connection = require('../services/dbConnection');
 require('bluebird');
 
-function auth() {
+function auth(req) {
     if (
         !req.headers.authorization ||
         !req.headers.authorization.startsWith('Bearer') ||
@@ -25,16 +26,16 @@ function auth() {
 
 // ------------------ get all posts
 
-router.post('/chat/all', (req, res, next) => {
-
-    if (auth().tokenid.length > 0) {
+router.post('/allchat', (req, res, next) => {
+    console.log('route allchat reached');
+    if (auth(req).tokenid.length > 0) {
 
         const table = "Threads";
-        condition = '= 1 order by DateCreation limit 25 desc'; // toutes les ligne de la table thread
+        condition = ' 1 order by `DateCreation` DESC limit 25 '; // toutes les ligne de la table thread
 
         dbquery.getEntries(table, condition)
             .then((resolve) => {
-                const data = resolve[0];
+                const data = resolve;
                 res.status(200).json({ msg: 'select returned', data });
 
             })
@@ -50,14 +51,14 @@ router.post('/chat/all', (req, res, next) => {
 
 });
 // get one post
-router.post('/chat/one', (req, res, next) => {
+router.post('/onechat', (req, res, next) => {
 
-    if (auth().tokenid.length > 0) {
+    if (auth(req).tokenid.length > 0) {
 
         const table = "Threads";
-        condition = 'UserPassword = ' + "'" + decoded.tokenid + "'"; // id créé avec tokenid = hashed userPassword
-        col = '??';
-        dbquery.getOneEntrie(col,table, condition)
+        condition = 'IdUser = ' + "'" + req.ownerId + "'"; // le post créé par l'utilisateur identifié par userID
+        col = '*';
+        dbquery.getOneEntrie(col, table, condition)
             .then((resolve) => {
                 const data = resolve[0];
                 res.status(200).json({ msg: 'select returned', data });
@@ -76,17 +77,36 @@ router.post('/chat/one', (req, res, next) => {
 });
 
 // -------------- update one post
-router.post('/updatePost', (req, res, next) => {
-   
-    if (auth().tokenid.length > 0) {
+router.post('/updatepost', (req, res, next) => {
+
+    if (auth(req).tokenid.length > 0) {
 
         const table = "Threads";
-        condition = 'UserId = ' + req.body.UserId ; // id créé avec tokenid = hashed userPassword
-        data = '';
-        dbquery.updateOneEntrie(table,data, condition)
+        condition = 'IdThread = ' + req.body.IdThread; // id créé avec tokenid = hashed userPassword
+
+        let data = '';
+        let i = 0;
+
+        for (let obj in req.body) {
+            if (obj != 'IdThread') {
+                let col = obj;
+                let val = req.body[obj];
+
+                if (i > 0) {
+
+                    data = data + ' , ';
+                }
+
+                data = data + '\`' + col + '\`' + " = " + '\'' + val + '\'';
+                i++;
+            }
+        }
+        //console.log ('data: ' + data);
+
+        dbquery.updateOneEntrie(table, data, condition)
             .then((resolve) => {
                 const data = resolve[0];
-                res.status(200).json({ msg: 'select returned', data });
+                res.status(200).json({ msg: 'update commited', data });
 
             })
             .catch((reject) => {
@@ -102,30 +122,69 @@ router.post('/updatePost', (req, res, next) => {
 });
 
 // ----------- create one post
-router.post('/createPost', (req, res, next) => {
+router.post('/createpost', (req, res, next) => {
 
-    if (auth().tokenid.length > 0) {
+    if (auth(req).tokenid.length > 0) {
 
-        const table = "Threads";
-        value = '??';
-        col = '??';
-        dbquery.insertOneEntrie(col,table,value)
-            .then((resolve) => {
-                const data = resolve[0];
-                res.status(200).json({ msg: 'select returned', data });
+        // chercher les droits user associés à l'action
+        //console.log ( 'userId:' + req.body.data.idUser);
+        let queryString = 'Select * from `DroitsUser` where IdUser = ' + req.body.data.idUser + ';';
+        //1console.log (queryString);
+        connection.query(queryString, function (err, result) {
+            if (err) {
+                console.log(err);
+            }
+            //console.log(result.length);
+            if (result.length > 0) {
+                //console.log('entrée dans la boucle for')
+                for (const line of result) {
+                    //console.log(line);
+                    console.log(req.body.data.action);
+                    if (line.ActionDroit == req.body.data.action) {         // si l'action a réaliser est autorisée dans le context
 
-            })
-            .catch((reject) => {
-                res.status(400).json({ msg: 'select return with error: ' + reject });
-            });
+                        const table = "Threads";
 
+                        let i = 0;
+                        let col = '(';
+                        let val = '(';
 
+                        for (let obj in req.body.data) {
+                            if (obj != 'action') {
+                                col = col + '`' + obj + '`, ';
+                                val = val + '\'' + req.body.data[obj] + '\', ';
+                            }
+                            i++;
+                        };
+                        console.log('avant:' + col + ' | ' + val);
+                        col = col.slice(0, -2) + ')';  // ajout parenthèse de fin
+                        val = val.slice(0, -2) + ')'; // String - deux derniers caractères : , et [esp]
+                        console.log('après:' + col + ' | ' + val);
+
+                        console.log('col: ' + col + 'val:' + val);
+                        dbquery.insertOneEntrie(col, table, val)
+                            .then((resolve) => {
+                                res.status(200).json({ msg: 'insert commited' });
+
+                            })
+                            .catch((reject) => {
+                                res.status(400).json({ msg: 'select return with error: ' + reject });
+                            });
+                    };
+                };
+
+            }
+            else {
+                res.status(500).json({ msg: "user right undefined for this action" });
+
+            };
+        });
     } else {
-
         res.status(401).json({ msg: 'invalid token ' });
     };
-    
 });
+
+
+
 
 
 // ---------- update one thread (forum )
@@ -140,15 +199,15 @@ router.post('/createThread', (req, res, next) => {
 
 // delete thread or delete post ( by id )
 router.delete('/delete', (req, res, next) => {
-    if (auth().tokenid.length > 0) {
+    if (auth(req).tokenid.length > 0) {
 
         const table = "Threads";
-        condition = '??';
-        
-        dbquery.deleteOneEntrie(table,condition)
+        condition = ' `IdUser` = ' + req.body.UserId + ' and `IdThread` = ' + req.body.ThreadId;
+
+        dbquery.deleteOneEntrie(table, condition)
             .then((resolve) => {
                 const data = resolve[0];
-                res.status(200).json({ msg: 'select returned', data });
+                res.status(200).json({ msg: 'delete commited', data });
 
             })
             .catch((reject) => {
@@ -160,7 +219,7 @@ router.delete('/delete', (req, res, next) => {
 
         res.status(401).json({ msg: 'invalid token ' });
     };
-   
+
 });
 
 module.exports = router;
