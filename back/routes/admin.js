@@ -50,42 +50,58 @@ router.post('/gettable', (req, res, next) => {
 
 });
 
+router.post('/getparams', (req, res, next) => {
+
+    if (auth(req).tokenid.length > 0) {
+
+        const table = "Params";
+        condition = ' 1 order by `Id` '; // toutes les ligne de la table Params
+
+        dbquery.getViewEntries(table, condition)
+            .then((resolve) => {
+                const data = resolve;
+                res.status(200).json({ msg: 'select returned', data });
+
+            })
+            .catch((reject) => {
+                res.status(400).json({ msg: 'select return with error: ' + reject });
+            });
+
+
+    } else {
+
+        res.status(401).json({ msg: 'invalid token ' });
+    };
+
+});
+
+
 // ------------------------ update Admi_view
 
 router.post('/updatetable', (req, res, next) => {
 
     if (auth(req).tokenid.length > 0) {
         console.log('auth: ok');
-
+        const droitInsert = [];
         const array = Object.keys(req.body);
         //console.log(array);
         for (member of array) {
             //console.log (member);
-            if (member in ['ActionDroit', 'NiveauDroit', 'AllowSuppr', 'AllowChange']) {
+            const permList = ['IdUser', 'ActionDroit', 'NiveauDroit', 'AllowSuppr', 'AllowChange'];
+            
+            if (permList.includes(member)) {
                 // action update sur DroitsUser
                 console.log(member);
-                const querryString = 'Update `DroitsUser` Set `' + member + '` = \'' + req.body[member] + '\' WHERE IdUser = ' + req.body.UserId + '\' ;';
-
-                console.log(querryString);
-                connection.query(querryString, function (err, result) {
-                    if (result) {
-                        console.log(result);
-                        res.status(200).json({ msg: 'update ok' });
-
-                    };
-                    if (err) {
-                        console.log(err);
-                        res.status(400).json({ msg: 'update return with error: ' + err });
-                    };
-                });
+                droitInsert.push( member, req.body[member]);
 
             };
-            if (member in ['UserLogin', 'UserService', 'UserMailPro']) {
+            const userList = ['UserLogin', 'UserService', 'UserRole', 'UserMailPro'];
+            if (userList.includes(member)) {
                 // action update sur Users
-                console.log (member);
-                const querryString = 'Update `Users` Set `' + member + '` = \'' + req.body[member] + '\' WHERE UserId = ' + req.body.UserId + '\' ;';
+                console.log(member + ' | ' + req.body[member]);
+                const querryString = 'Update `Users` Set `' + member + '` = \'' + req.body[member] + '\' WHERE UserId = ' + req.body.UserId + ' ;';
 
-                console.log(querryString);
+                console.log('querry: ' + querryString);
                 connection.query(querryString, function (err, result) {
                     if (result) {
                         console.log(result);
@@ -100,6 +116,42 @@ router.post('/updatetable', (req, res, next) => {
 
 
             };
+        };
+        if (droitInsert.length > 0) {
+            console.log(droitInsert);
+            const keys = [];
+            const values = [];
+            
+            for ( let index in droitInsert) {
+                if ( index % 2 == 0 ) {
+                    
+                    keys.push('\`' + droitInsert[index] + '\`');
+                }else{
+                    if ( Number.isInteger(droitInsert[index]) ){
+                        
+                        values.push( droitInsert[index] );    
+                    }else {
+                        values.push('\'' + droitInsert[index] + '\'' );
+                    }
+                    
+                };
+
+            };
+            
+            const querryString = 'Insert Ignore into `DroitsUser`(' + keys + ') values( ' + values + ');';
+
+            console.log(querryString);
+            connection.query(querryString, function (err, result) {
+                if (result) {
+                    console.log(result);
+                    res.status(200).json({ msg: 'update ok' });
+
+                };
+                if (err) {
+                    console.log(err);
+                    res.status(400).json({ msg: 'update return with error: ' + err });
+                };
+            }); 
         };
     } else {
 

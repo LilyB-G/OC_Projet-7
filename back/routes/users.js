@@ -91,7 +91,7 @@ router.post('/login', (req, res, next) => {
 
                     dbquery.updateOneEntrie(table, data, condition);
 
-                    col = '`UserId`,`UserLastLogin`,`UserService`';
+                    col = '`UserId`,`UserLastLogin`,`UserRole`';
                     table = 'Users';
                     condition = '`UserId` = ' + result[0].UserId;
                     dbquery.getOneEntrie(col, table, condition)
