@@ -42,10 +42,10 @@ export const useUserStore = defineStore({
                     this.userId = result.data.userData.UserId;
                     this.lastLogin = result.data.userData.UserLastLogin;
                     try {
-                        const strToArray = result.data.userData.UserService.split('|');
+                        const strToArray = result.data.userData.UserRole.split(',');
 
 
-                        if (strToArray.find(str => str == 'Admin') == 'Admin') {
+                        if (strToArray.find(str => str == 'Admin') ) {
                             this.admin = true;
                         };
                     } catch { };

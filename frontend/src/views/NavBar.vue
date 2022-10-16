@@ -24,9 +24,13 @@
             </router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link disabled" to="/Admin">
+            <router-link class="nav-link" v-if="activeAdminLink" to="/Admin">
               Admin
             </router-link>
+            <div class="nav-link" v-else disabled > 
+              Admin
+            </div>
+
           </li>
           <li class="nav-item dropup">
             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">Social
@@ -75,6 +79,7 @@ const router = useRouter();
 const userStore = useUserStore();
 
 let showLogout_btn = false;
+let activeAdminLink = false;
 
 function logout(){
       userStore.token = '';
@@ -88,6 +93,9 @@ function logout(){
 
 showLogout_btn = computed(() => {
   return userStore.is_authenticated;
+});
+activeAdminLink = computed(() => {
+  return userStore.is_admin;
 });
 
 /* router.beforeEach((to)=>{

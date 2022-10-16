@@ -1,6 +1,5 @@
 <template>
-
-    <button class="btn btn-dark" @click = "chatStore.action = 'create'">Create New </button>
+    <button class="btn btn-dark fixed-top" v-if="showPostCreate()" @click = "chatStore.action = 'create'">Create New </button>
 
     <div class="zindex">
         <div class="container-sm">
@@ -17,8 +16,20 @@
 <script setup>
 import { useChatStore } from '@/store/chatStore';
 import textAreaAutosize from '@/components/TextAreaAutosize.vue';
+import {useRoute} from 'vue-router'
 
 const chatStore = useChatStore();
+const thisRoute = useRoute();
+
+const showPostCreate = () => {
+    
+    if (thisRoute.path == '/Chat'){
+        return true;
+    }else{ 
+        return false;
+    };
+    
+}
 
 
 </script>

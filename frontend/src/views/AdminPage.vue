@@ -1,104 +1,320 @@
 <template>
 
-  <div class="table-md" >
-    <table class="table table-striped table-bordered table-hover table-sm">
-      <thead class="thead-dark">
-        <tr>
-          <th scope="col">UserId</th>
-          <th scope="col">UserLogin</th>
-          <th scope="col">UserPassword</th>
-          <th scope="col">UserService</th>
-          <th scope="col">UserMailPro</th>
-          <th scope="col">Action Permission</th>
-          <th scope="col">Action hierarchie</th>
-          <th scope="col">Allow Suppr</th>
-          <th scope="col">Allow Change</th>
-          <th scope="col">Date Creation Permission</th>
-          <th scope="col">Dates Update Permissions</th>
+    <div class="table-md">
+        <table class="table table-striped table-bordered table-hover table-sm">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Index</th>
+                    <th scope="col">UserId</th>
+                    <th scope="col">UserLogin</th>
+                    <th scope="col">UserPassword</th>
+                    <th scope="col">Service</th>
+                    <th scope="col">Role</th>
+                    <th scope="col">UserMailPro</th>
+                    <th scope="col">Context Permission</th>
+                    <th scope="col">Date Create Permission</th>
+                    <th scope="col">Dates Update Permissions</th>
 
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="lign" v-for="user in adminScreen">
-          <td>
-            {{user.UserId}}
-          </td>
-          <td>
-            <input type="text" class="userLign" v-model="user.UserLogin" @change="adminStore.updateCell({UserLogin : user.UserLogin, UserId : user.UserId, token:userStore.token})">
-          </td>
-          <td>
-            <input type="text" class="userLign" v-model="user.UserPassword">
-          </td>
-          <td>
-            <input type="text" class="userLign" v-model="user.UserService">
-          </td>
-          <td>
-            <input type="text" class="userLign" v-model="user.UserMailPro">
-          </td>
-          <td>
-            <input type="text" class="userLign" v-model="user.ActionDroit">
-          </td>
-          <td>
-            <input type="text" class="userLign" v-model="user.NiveauDroit">
-          </td>
-          <td>
-            <input type="text" class="userLign" v-model="user.AllowSuppr">
-          </td>
-          <td>
-            <input type="text" class="userLign" v-model="user.AllowChange">
-          </td>
-          <td>
-            <input type="text" class="userLign" v-model="user.DateCreaDroit">
-          </td>
-          <td>
-            <input type="text" class="userLign" v-model="user.DateModifDroit">
-          </td>
-        </tr>
-      </tbody>
-      <tfoot>
-        <tr>
-          <td>
-            <div id="userSum">sum</div>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="lign" v-for="(user,index) in table">
+                    <td>
+                        {{index}}
+                    </td>
+                    <td>
+                        {{user.UserId}}
+                    </td>
+                    <td>
+                        <input type="text" class="userLign" v-model="user.UserLogin"
+                            @change="adminStore.updateCell({UserLogin : user.UserLogin, UserId : user.UserId, token:userStore.token})">
+                    </td>
+                    <td>
+                        <textarea type="text" class="userLign-password" disabled>{{user.UserPassword}}</textarea>
+                    </td>
+                    <!-- ----------------------------------------  Service --------------------------------------- -->
+                    <td>
+                        <div class="btn-group dropend">
+                            <button class="btn btn-secondary btn-sm dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                (+)
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li v-for="param in params">
+                                    <button class="dropdown-item" type="button"
+                                        v-if="(param.Component == 'DesckAdminPage' && param.Utilisation.includes('Service') &&  (user.UserService == undefined || !user.UserService.includes(param.Design)))"
+                                        @click="addService(param.Design,index)">{{param.Design}}
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="btn-group dropend" v-if="(user.UserService != undefined)">
+                            <button class="btn btn-secondary btn-sm dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                (-)
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li v-for="param in params">
+                                    <button class="dropdown-item" type="button"
+                                        v-if="(param.Component == 'DesckAdminPage' && param.Utilisation.includes('Service') && user.UserService.includes(param.Design) )"
+                                        @click="removeService(param.Design,index)">{{param.Design}}
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div type="text" class="userLign">{{user.UserService}}</div>
 
-          </td>
+                    </td>
 
-        </tr>
-      </tfoot>
-    </table>
-  </div>
+                    <!-- ----------------------------------------  Role --------------------------------------- -->
+                    <td>
+                        <div class="btn-group dropend">
+                            <button class="btn btn-secondary btn-sm dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                (+)
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li v-for="param in params">
+                                    <button class="dropdown-item" type="button"
+                                        v-if="(param.Component == 'DesckAdminPage' && param.Utilisation.includes('Groupomania') &&  (user.UserRole == undefined || !user.UserRole.includes(param.Design)))"
+                                        @click="addRole(param.Design,index)">{{param.Design}}
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="btn-group dropend" v-if="(user.UserService != undefined)">
+                            <button class="btn btn-secondary btn-sm dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                (-)
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li v-for="param in params">
+                                    <button class="dropdown-item" type="button"
+                                        v-if="(param.Component == 'DesckAdminPage' && param.Utilisation.includes('Groupomania') && user.UserRole.includes(param.Design) )"
+                                        @click="removeRole(param.Design,index)">{{param.Design}}
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div type="text" class="userLign">{{user.UserRole}}</div>
+
+                    </td>
+                    <!-- --------------------------- UserMailPro ------------------------- -->
+                    <td>
+                        <div class="userLign">{{user.UserMailPro}}</div>
+                    </td>
+                    <!-- --------------------------- Context ------------------------- -->
+                    <td>
+                        <div class="btn-group dropend">
+                            <button class="btn btn-secondary btn-sm dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                (+)
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li v-for="li in allowed_Context">
+                                    <button class="dropdown-item" type="button"
+                                        v-if="user.NiveauDroit == null || !user.NiveauDroit.includes(li)"
+                                        @click="addCtxPerm(li,index)">{{li}}
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="dropdown-item" type="dropdown-divider">
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="dropdown-item" type="button">
+                                        add new entrie
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="btn-group dropend">
+                            <button class="btn btn-secondary btn-sm dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                (-)
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li v-for="li in allowed_Context">
+                                    <button class="dropdown-item" type="button"
+                                        v-if="user.NiveauDroit != null && user.NiveauDroit.includes(li)"
+                                        @click="removeCtxPerm(li,index)">{{li}}
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="dropdown-item" type="dropdown-divider">
+
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="dropdown-item" type="button">
+                                        update/remove entrie
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="d-inline" v-for="obj of filtered">
+                            <div class="filteredDroit" v-if="(obj.IdUser == user.UserId)">
+                                {{obj.NiveauDroit}}
+                                <div class="d-inline">
+                                    <div class="form-check form-switch" v-if="obj.ActionDroit == ''">
+                                        Create
+                                        <input type="checkbox" class="form-check-input" name="create">
+                                    </div>
+                                    <div class="form-check form-switch" v-if="obj.ActionDroit == ''">
+                                        Update
+                                        <input type="checkbox" class="form-check-input" name="update">
+                                    </div>
+                                    <div class="form-check form-switch" v-else>
+                                        {{obj.ActionDroit}}
+                                        <input type="checkbox" class="form-check-input" name="create">
+                                    </div>
+                                </div>
+
+
+                            
+                            <div class="form-check form-switch">
+                                AllowSuppr
+                                <input type="checkbox" class="form-check-input" v-model="user.AllowSuppr">
+                            </div>
+
+                            <div class="form-check form-switch">
+                                AllowChange
+                                <input type="checkbox" class="form-check-input" v-model="user.AllowChange">
+                            </div>
+                        </div>
+
+                        </div>
+
+
+                    </td>
+
+                    <td>
+                        <div type="text" class="userLign">{{user.DateCreaDroit}}
+                        </div>
+                    </td>
+                    <td>
+                        <div type="text" class="userLign">{{user.DateModifDroit}}
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td>
+                        <div id="userSum">{{table.length}}</div>
+
+                    </td>
+
+                </tr>
+            </tfoot>
+        </table>
+    </div>
 
 
 </template>
-
+  
 <script setup>
 
 import { useAdminStore } from '@/store/adminStore';
 import { useUserStore } from '@/store/UserStore'
-import { reactive } from 'vue';
+import { storeToRefs } from 'pinia';
 
-const Query = require('@/components/genericQuery');
 
 //pinia Storage access
 
 const adminStore = useAdminStore();
 const userStore = useUserStore();
 
-let adminScreen = reactive({});
-adminScreen = adminStore.table;
+const { table, params, allowed_Context, filtered } = storeToRefs(adminStore);
 
 /*
-  get admin data
-*/
+    get admin data
+  */
 adminStore.get(userStore.token);
 
 
+const addService = (payload, key) => {
+    let array = [];
+    if (adminStore.table[key].UserService != '') {
+        array = adminStore.table[key].UserService.split(',')
+    };
+    array.push(payload);
+    let toString = array.toString();
+    adminStore.updateCell({ UserService: toString, UserId: adminStore.table[key].UserId, token: userStore.token }, 'User');
+    adminStore.refresh(key, 'UserService', toString);
+};
+const removeService = (payload, key) => {
+    let array = [];
+    if (adminStore.table[key].UserService != '') {
+        array = adminStore.table[key].UserService.split(',')
+    };
+    let filtered = array.filter((roll) => roll != payload);
+    let toString = filtered.toString();
+    adminStore.updateCell({ UserService: toString, UserId: adminStore.table[key].UserId, token: userStore.token }, 'User');
+    adminStore.refresh(key, 'UserService', toString);
+
+};
+
+const addRole = (payload, key) => {
+    
+    let array = [];
+    if (adminStore.table[key].UserRole != '') {
+        array = adminStore.table[key].UserRole.split(',');
+    };
+    array.push(payload);
+    let toString = array.toString();
+    adminStore.updateCell({ UserRole: toString, UserId: adminStore.table[key].UserId, token: userStore.token }, 'User');
+    adminStore.refresh(key, 'UserRole', toString);
+};
+const removeRole = (payload, key) => {
+    let array = [];
+    if (adminStore.table[key].UserRole != '') {
+        array = adminStore.table[key].UserRole.split(',');
+    };
+    let filtered = array.filter((roll) => roll != payload);
+    let toString = filtered.toString();
+    adminStore.updateCell({ UserRole: toString, UserId: adminStore.table[key].UserId, token: userStore.token }, 'User');
+    adminStore.refresh(key, 'UserRole', toString);
+};
+
+const addCtxPerm = (payload, key) => {
+    
+    let array = [];
+    if (adminStore.table[key].NiveauDroit != '' && adminStore.table[key].NiveauDroit != null) {
+        array = adminStore.table[key].NiveauDroit.split(',')
+    };
+    array.push(payload);
+    let toString = array.toString();
+    adminStore.updateCell({ NiveauDroit: toString, IdUser: adminStore.table[key].UserId, token: userStore.token }, 'Droit');
+    adminStore.refresh(key, 'NiveauDroit', toString);
+};
+const removeCtxPerm = (payload, key) => {
+    let array = [];
+    if (adminStore.table[key].NiveauDroit != '' && adminStore.table[key].NiveauDroit != null) {
+        array = adminStore.table[key].NiveauDroit.split(',')
+    };
+    let filtered = array.filter((roll) => roll != payload);
+    let toString = filtered.toString();
+    adminStore.updateCell({ NiveauDroit: toString, IdUser: adminStore.table[key].UserId, token: userStore.token }, 'Droit');
+    adminStore.refresh(key, 'NiveauDroit', toString);
+
+};
 
 
 </script>
-
+  
 <style >
 .table-md {
-  max-width : 8px; 
+    max-width: 8px;
 }
 
+.checkbox {
+    text-align: center;
+}
+
+.userLign-password {
+    font-size: 10px;
+    justify-content: center;
+    max-width: 200px;
+}
 </style>
