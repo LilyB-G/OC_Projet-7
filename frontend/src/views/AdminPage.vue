@@ -18,7 +18,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr class="lign" v-for="(user,index) in table">
+                <tr class="lign" v-for="(user,index) in filtered">
                     <td>
                         {{index}}
                     </td>
@@ -152,39 +152,44 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="d-inline" v-for="obj of filtered">
-                            <div class="filteredDroit" v-if="(obj.IdUser == user.UserId)">
-                                {{obj.NiveauDroit}}
-                                <div class="d-inline">
-                                    <div class="form-check form-switch" v-if="obj.ActionDroit == ''">
-                                        Create
-                                        <input type="checkbox" class="form-check-input" name="create">
-                                    </div>
-                                    <div class="form-check form-switch" v-if="obj.ActionDroit == ''">
-                                        Update
-                                        <input type="checkbox" class="form-check-input" name="update">
-                                    </div>
-                                    <div class="form-check form-switch" v-else>
-                                        {{obj.ActionDroit}}
-                                        <input type="checkbox" class="form-check-input" name="create">
-                                    </div>
-                                </div>
+                        <div>
+                            <table class="table table-striped"
+                                v-if="user.NiveauDroit != null && user.NiveauDroit.includes('_')">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Context</th>
+                                        <th scope="col">Permissons</th>
+                                    </tr>
+                                </thead>
+                                <tbody v-for="obj of filtered">
+                                    <tr v-if="obj.IdUser == user.UserId">
+                                        <td class="cellDroit">{{obj.NiveauDroit}}
+                                        </td>
+                                        <td>
+                                            <table class="table table-bordered">
+                                                <tr v-for="chk of chkBxList">
+                                                    <td>
+                                                        {{chk.Name}}
+                                                        <input type="checkbox" class="checkbox"
+                                                            v-if="obj.ActionDroit.includes(chk.Name) " checked
+                                                            v-model="chkBx" :value= "obj.IdUser + ',' + chk.Name"
+                                                            @change="eventChkBx({'IdDroits' : obj.IdDroits,'NiveauDroit':obj.NiveauDroit,'IdUser':user.UserId})">
+                                                        <input type="checkbox" class="checkbox" v-else 
+                                                            v-model="chkBx" :value="obj.IdUser + ',' + chk.Name"
+                                                            @change="eventChkBx({'IdDroits' : obj.IdDroits,'NiveauDroit':obj.NiveauDroit,'IdUser':user.UserId})">
 
+                                                    </td>
 
-                            
-                            <div class="form-check form-switch">
-                                AllowSuppr
-                                <input type="checkbox" class="form-check-input" v-model="user.AllowSuppr">
-                            </div>
-
-                            <div class="form-check form-switch">
-                                AllowChange
-                                <input type="checkbox" class="form-check-input" v-model="user.AllowChange">
-                            </div>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
 
-                        </div>
-
+                        <input type="checkbox" class="form-check-input" v-model="user.AllowSuppr"> Suppr
+                        <input type="checkbox" class="form-check-input" v-model="user.AllowChange"> Change
 
                     </td>
 
@@ -218,7 +223,7 @@
 import { useAdminStore } from '@/store/adminStore';
 import { useUserStore } from '@/store/UserStore'
 import { storeToRefs } from 'pinia';
-
+import { ref } from 'vue';
 
 //pinia Storage access
 
@@ -256,7 +261,7 @@ const removeService = (payload, key) => {
 };
 
 const addRole = (payload, key) => {
-    
+
     let array = [];
     if (adminStore.table[key].UserRole != '') {
         array = adminStore.table[key].UserRole.split(',');
@@ -278,7 +283,7 @@ const removeRole = (payload, key) => {
 };
 
 const addCtxPerm = (payload, key) => {
-    
+
     let array = [];
     if (adminStore.table[key].NiveauDroit != '' && adminStore.table[key].NiveauDroit != null) {
         array = adminStore.table[key].NiveauDroit.split(',')
@@ -300,6 +305,53 @@ const removeCtxPerm = (payload, key) => {
 
 };
 
+const chkBx = ref([]   // stockage des états de checkBox droits User
+    
+);
+
+
+const chkBxList = [  // liste des choix de checkBox droit User pour construction dynamique
+    {
+        "Id": '1',
+        "Name": 'Create',
+    },
+    {
+        "Id": '2',
+        "Name": 'Update',
+
+    },
+    {
+        "Id": '3',
+        "Name": 'Delete',
+    },
+    {
+        "Id": '4',
+        "Name": 'Moderation',
+    },
+];
+
+const eventChkBx = (lines) => {
+
+    const data = {};
+
+    // chercher l'id droits pour userId et actiondroit connus
+
+    console.log(lines);
+    console.log(chkBx);
+
+    Object.assign(data, {
+        'IdDroits': lines.IdDroits,
+        'IdUser': lines.IdUser,
+        'ActionDroit': lines.ActionDroit,
+        'NiveauDroit': lines.NiveauDroit,
+    });
+
+    adminStore.setDroits(data, userStore.token) // insert or update send to back
+
+
+};
+
+
 
 </script>
   
@@ -310,6 +362,12 @@ const removeCtxPerm = (payload, key) => {
 
 .checkbox {
     text-align: center;
+
+}
+
+.cellDroit {
+    text-align: center;
+    vertical-align: middle;
 }
 
 .userLign-password {

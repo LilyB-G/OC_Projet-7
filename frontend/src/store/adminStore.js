@@ -79,7 +79,7 @@ export const useAdminStore = defineStore({
                             //charger nouvelles valeurs
                             Object.assign(this.table, res.data.data);   // copie dans store
 
-                            console.log(groupValue(res.data.data))
+                            //console.log(groupValue(res.data.data))
                             this.filtered = groupValue(res.data.data); // filtered table
 
                         }
@@ -126,35 +126,80 @@ export const useAdminStore = defineStore({
                 return false
             };
         },
-        refresh : (key, obj, value) => {
+        refresh: (key, obj, value) => {
             Object.assign(this.table[key], { [obj]: value });
+        },
+        
+    
+        setDroits(data, token) {
+            
+            let toUrl = 'http://localhost:3000/admin/setDroits';
+            const axiosConfig = {
+                headers: {
+                    "Content-Type": 'application/json',
+                    "Authorization": 'Bearer ' + token,
+                    "Access-Control-Allow-Origin": "*",
+    
+                }
+            };
+    
+            if (token) {
+                Axios.post(toUrl, data, axiosConfig)
+                    .then((res) => {
+                        if (res.status == 200) {
+    
+                            console.log(res.data.data);   // retour objet
+    
+                        }
+                        else if (res.status in ['400', '401', '402']) {
+                            console.log('unauthorized');
+    
+                        }
+                        else {
+                            console.log(res.status);
+    
+                        }
+                    })
+                    .catch((err) => {
+                        console.log(err);
+    
+                    })
+            }
+            else {
+                console.log('error ' + 'unautorized');
+                return false
+            };
+    
+    
         },
 
     },
+
+    
 
     getters: {
         iniCtxPerm: (state) => {
             let temp = ''
             for (let i in state.params) {
-                
-                if ( state.ctxperm.length === 0 ) {
+
+                if (state.ctxperm.length === 0) {
                     state.ctxperm.push(state.params[i].Utilisation);
                     temp = state.params[i].Utilisation;
-                    if (temp.includes('_') ) {
-                        state.allowed_Context.push(temp);                 
+                    if (temp.includes('_')) {
+                        state.allowed_Context.push(temp);
                     }
-                }else{    
+                } else {
                     if (!state.ctxperm.includes(state.params[i].Utilisation)) {
                         temp = state.params[i].Utilisation;
                         state.ctxperm.push(temp);
-                        if (temp.includes('_') ) {
-                            state.allowed_Context.push(temp);                 
+                        if (temp.includes('_')) {
+                            state.allowed_Context.push(temp);
                         }
                     };
 
                 };
-               
-                console.log('allowed: ' + state.allowed_Context);
+
+                //console.log('allowed: ' + state.allowed_Context);
 
             };
 
