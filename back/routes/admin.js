@@ -75,6 +75,91 @@ router.post('/getparams', (req, res, next) => {
 
 });
 
+router.post('/setDroits', (req, res, next) => {
+
+    if (auth(req).tokenid.length > 0) {
+
+        const table = "DroitsUser";
+        let ctrlArray = [];
+        let returnVal = '';
+
+        let condition = '`IdUser` = ' + req.body.IdUser + ' and `NiveauDroit`= \'' + req.body.NiveauDroit + '\';';
+        dbquery.getEntries(table, condition)
+            .then((result) => {
+                for (let obj of result) {
+                    // req.body.ActionDroit attendu sous forme ['Update','Create','Delete'...]
+                    // obj.ActionDroit dans la boucle = 'Create' puis 'Update'
+                    //console.log(req.body.ActionDroit);
+                    //console.log(obj.ActionDroit);
+
+                    if (!req.body.ActionDroit.includes(obj.ActionDroit) && obj.ActionDroit != undefined ) {
+                        // ici delete valeur
+                        let condition = '`IdDroits` = ' + obj.IdDroits +';';
+                        dbquery.deleteOneEntrie(table,condition)
+                        .then(() => {
+                            returnVal = 'success';
+
+                        })
+                        .catch((reject) => {
+                            returnVal = reject;
+                            res.status(400).json({ msg: 'select return with error: ' + reject });
+                        });
+                    }
+                    
+                    if (req.body.ActionDroit.includes(obj.ActionDroit)) {
+                        // la valeur est présente mais n'a pas changée => pas d'action sur la table, mais alimentation d'un array de contrôle
+                        ctrlArray.push(obj.ActionDroit);
+                        
+                    };
+                };
+                // comparaison ctrlArray et req.body.ActionDroit les valeurs se trouvant dans req.body.ActionDroit mais absentes de ctrlArray sont des nouvelles valeurs à insérer
+                let finalArray = req.body.ActionDroit.filter((r) => !ctrlArray.includes(r));
+
+                console.log(finalArray);
+                
+
+                if (finalArray.length > 0) {
+                    condition = ''; 
+                    for (let member of finalArray) {
+                        const data = {
+                            IdUser: req.body.IdUser,
+                            ActionDroit: member,
+                            NiveauDroit: req.body.NiveauDroit,
+                        };
+
+                        dbquery.InsertOrUpdateEntries(table, data, condition)
+                            .then(() => {
+                                if (returnVal == '' || returnVal == 'success'){
+                                returnVal = 'success';
+                                };
+
+                            })
+                            .catch((reject) => {
+                                returnVal = reject;
+                                res.status(400).json({ msg: 'select return with error: ' + reject });
+                            });
+                        
+                    };
+                    if (returnVal == 'success') {
+                        res.status(200).json({ msg: 'delete,update or insert ok' });
+                    }else{
+                        res.status(500).json({ msg: 'something wrong' });
+                    };
+                }
+
+
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
+    } else {
+
+        res.status(401).json({ msg: 'invalid token ' })
+    };
+
+});
+
 
 // ------------------------ update Admi_view
 
@@ -88,11 +173,11 @@ router.post('/updatetable', (req, res, next) => {
         for (member of array) {
             //console.log (member);
             const permList = ['IdUser', 'ActionDroit', 'NiveauDroit', 'AllowSuppr', 'AllowChange'];
-            
+
             if (permList.includes(member)) {
                 // action update sur DroitsUser
                 console.log(member);
-                droitInsert.push( member, req.body[member]);
+                droitInsert.push(member, req.body[member]);
 
             };
             const userList = ['UserLogin', 'UserService', 'UserRole', 'UserMailPro'];
@@ -121,23 +206,23 @@ router.post('/updatetable', (req, res, next) => {
             console.log(droitInsert);
             const keys = [];
             const values = [];
-            
-            for ( let index in droitInsert) {
-                if ( index % 2 == 0 ) {
-                    
+
+            for (let index in droitInsert) {
+                if (index % 2 == 0) {
+
                     keys.push('\`' + droitInsert[index] + '\`');
-                }else{
-                    if ( Number.isInteger(droitInsert[index]) ){
-                        
-                        values.push( droitInsert[index] );    
-                    }else {
-                        values.push('\'' + droitInsert[index] + '\'' );
+                } else {
+                    if (Number.isInteger(droitInsert[index])) {
+
+                        values.push(droitInsert[index]);
+                    } else {
+                        values.push('\'' + droitInsert[index] + '\'');
                     }
-                    
+
                 };
 
             };
-            
+
             const querryString = 'Insert Ignore into `DroitsUser`(' + keys + ') values( ' + values + ');';
 
             console.log(querryString);
@@ -151,7 +236,7 @@ router.post('/updatetable', (req, res, next) => {
                     console.log(err);
                     res.status(400).json({ msg: 'update return with error: ' + err });
                 };
-            }); 
+            });
         };
     } else {
 
