@@ -2,8 +2,11 @@
     <div class="card w-100 messages" v-for="message in chatStore.Chat.data">
         <div class="card-header">
             <img src="https://bootdey.com/img/Content/avatar/avatar7.png" class="rounded-circle" alt="Avatar">
-            <div class="Head">
-                {{message.DateCreation}} {{message.DateUpdate}}
+            <div class="Head">{{message.UserLogin}}{{message.UserRole}}
+                <div class="right">
+                    created:{{message.DateCreation}} 
+                    updated:{{message.DateUpdate}}
+                </div>
             </div>
             <button type="button" class="btn btn-outline-danger ms-5"
                 @click="chatStore.action = 'answer'">Répondre</button>
@@ -26,12 +29,10 @@
 //import textAreaAutosize from '@/components/TextAreaAutosize.vue';
 import { useChatStore } from '@/store/chatStore';
 import { useUserStore } from '@/store/UserStore';
-
+import { defineProps } from 'vue';
 
 
 const Query = require('@/components/genericQuery');
-
-
 
 //pinia Storage access
 
@@ -51,7 +52,7 @@ const userStore = useUserStore();
 function formUpdate(idThread){
     chatStore.threadEdited = idThread;
     chatStore.action = 'update';
-    
+       
 }
 
 

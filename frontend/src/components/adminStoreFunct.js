@@ -1,62 +1,31 @@
-/* export default function groupVal(obj) {
-
-    const filter = [];
-    let newEntrie = true;
-
-    for (let obj[i] of obj) {
-        newEntrie = true;
-
-        for (const prevObj of filter) {
-            //console.log(prevObj);
-
-            if (prevObj.IdUser == obj[i].UserId) { // existance d'une ligne
-                newEntrie = false;
-                prevObj.ActionDroit = prevObj.ActionDroit + '|' + obj[i].ActionDroit;
-                prevObj.IdDroits = prevObj.IdDroits + '|' + obj[i].IdDroits;
-                if (prevObj.NiveauDroit != obj[i].NiveauDroit) {
-                    prevObj.NiveauDroit = prevObj.NiveauDroit + '|' + obj[i].NiveauDroit;
-                }
-                prevObj.DateCreaDroit = prevObj.DateCreaDroit + '|' + obj[i].DateCreaDroit;
-                prevObj.DateModifDroit = prevObj.DateModifDroit + '|' + obj[i].DateModifDroit;
-            }
-        };
-
-        if (newEntrie == true) {
-            filter.push(obj[i]);
-
-            console.log(filter);
-        }
-
-
-    };
-    //console.log(filter);
-    return filter;
-};
-
- */
 
 export default function groupVal(obj) {
 
     let filter = [];
     let j = 0;
 
-    filter[0]= '';
 
     for (let i in obj) {
         //console.log(obj[i]);
+        if (filter.length > 0 ) {
+            
+            if (filter[j].UserId == obj[i].UserId) {
 
-        if ( filter[j].UserId == obj[i].UserId ) {
-            
-            checkValExists(obj[i],filter);
-            
-        } else {
+                checkValExists(obj[i], filter);
+
+            } else {
+
+                filter.push(obj[i]);
+                j++
+
+            };
+        }else{
             filter.push(obj[i]);
-            j++
             
         };
 
     };
-    console.log(filter);
+    //console.log(filter);
     return filter;
 };
 

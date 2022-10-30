@@ -49,7 +49,8 @@ export const useUserStore = defineStore({
                             this.admin = true;
                         };
                     } catch { };
-
+                    const from = router.currentRoute.value.redirectedFrom.fullPath 
+                    router.push(from);
                 };
                 if (result.status === 500) {
                     msg = "incorrect request";
@@ -70,7 +71,7 @@ export const useUserStore = defineStore({
             const postData = {
                 email: payload.email,
                 password: payload.password,
-                name: payload.pseudo,
+                name: payload.name,
                 returnSecureToken: true,
             };
             const promise = Axios.post(payloadUrl, postData)
@@ -79,11 +80,13 @@ export const useUserStore = defineStore({
 
                 if (result.status === 200) {
 
-                    msg = 'authentication successes';
-                    expiresIn = result.data.expiresIn * 1000;
-                    token = result.data.token;
-                    userId = result.data.userData.UserId;
-                    lastLogin = result.data.userData.UserLastLogin;
+                    this.msg = 'authentication successes';
+                    this.expiresIn = result.data.expiresIn * 1000;
+                    this.token = result.data.token;
+                    this.userId = result.data.userData.UserId;
+                    this.lastLogin = result.data.userData.UserLastLogin;
+
+                    router.push('/User');
 
                 };
                 if (result.status === 500) {

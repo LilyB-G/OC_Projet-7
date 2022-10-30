@@ -1,11 +1,76 @@
 <template>
 <div>
-    <button for="file-input" class="btn btn-danger mt-2" @click="managefile">Manage file</button>
-    <input id="file-input" type="file" class="d-none" />
+    <div v-bind="getRootProps()">
+      <input v-bind="getInputProps()" />
+      <p v-if="isDragActive">Drop the files here ...</p>
+      <p v-else>Drag 'n' drop some files here, or click to select files</p>
+    </div>
+    <button class="btn btn-danger mb-1" @click="open">open</button>     
 </div>
 </template>
 <script>
+import { useDropzone } from "vue3-dropzone";
+import axios from "axios";
+import { useUserStore } from '@/store/UserStore';
+import { defineProps } from "vue";
 
+export default {
+  name: "UseDropzoneDemo",
+  
+  setup() {
+
+    const userStore = useUserStore();
+
+    const url = "http://localhost:3000/dropFile"; // Your url on the server side
+    const isDragActive = true;  
+    const saveFiles = (files) => {
+      const formData = new FormData(); // pass data as a form
+      for (var x = 0; x < files.length; x++) {
+        // append files as array to the form, feel free to change the array name
+        formData.append("images[]", files[x]);
+      }
+
+      // post the formData to your backend where storage is processed. In the backend, you will need to loop through the array and save each file through the loop.
+
+      const UserId = userStore.userId;
+
+      const props = defineProps({
+        IdThread: String,
+        
+        })
+      
+
+
+      axios
+        .post(url, { UserId , ThreadId, formData } , {
+          headers: {
+            "token" : userStore.token,
+            "Content-Type": "multipart/form-data",
+          },
+        })
+        .then((response) => {
+          console.info(response.data);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    };
+
+    function onDrop(acceptFiles, rejectReasons) {
+      saveFiles(acceptFiles); // saveFiles as callback
+      console.log(rejectReasons);
+    }
+
+    const { getRootProps, getInputProps, ...rest } = useDropzone({ onDrop });
+
+    return {
+      getRootProps,
+      getInputProps,
+      ...rest,
+      isDragActive,
+    };
+  },
+};
 </script>
 <style>
     

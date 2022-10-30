@@ -54,6 +54,7 @@ import { useChatStore } from '@/store/chatStore';
 import { useUserStore } from "@/store/UserStore";
 
 
+
 //pinia Storage access
 
 const chatStore = useChatStore();
@@ -62,17 +63,35 @@ const userStore = useUserStore();
 const textarea = ref();
 useAutoresizeTextarea(textarea);
 
-
 function close() {
     chatStore.action = '';
 };
 
 function insert(){
     chatStore.postInsert(userStore.token);
-    
+    // recharger la page
+    chatStore.get(userStore.token);
+    // close chatStore.action
+    chatStore.action = '';
 };
 function update(){
-    chatStore.postUpdate(userStore.token,chatStore.threadEdited);
+    let i = '';
+    for ( let index in chatStore.ori ){
+        i = chatStore.ori[index].IdThread; 
+        if (chatStore.ori[index].ThreadMessage != chatStore.Chat.data[i].ThreadMessage ){
+
+                console.log('différence trouvée');
+         }
+        // if (chatStore.ori[i].IdThread == obj.IdThread && chatStore.ori[i].ThreadMessage != obj.ThreadMessage ){
+        
+        //     console.log("ori: " + chatStore.ori[i].ThreadMessage + ' | new: ' + obj.ThreadMessage );
+        //chatStore.postUpdate(userStore.token,obj.IdThread, userStore.userId,files);
+        // recharger la page
+        //chatStore.get(userStore.token);
+    };
+    
+    // close chatStore.action
+    chatStore.action = '';
     
 };
 

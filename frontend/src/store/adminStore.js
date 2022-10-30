@@ -126,9 +126,6 @@ export const useAdminStore = defineStore({
                 return false
             };
         },
-        refresh: (key, obj, value) => {
-            Object.assign(this.table[key], { [obj]: value });
-        },
         
     
         setDroits(data, token) {
@@ -148,10 +145,11 @@ export const useAdminStore = defineStore({
                     .then((res) => {
                         if (res.status == 200) {
     
-                            console.log(res.data.data);   // retour objet
+                           // console.log(res.msg);   // retour objet
     
                         }
                         else if (res.status in ['400', '401', '402']) {
+                            
                             console.log('unauthorized');
     
                         }
@@ -204,7 +202,7 @@ export const useAdminStore = defineStore({
             };
 
         },
-
+        
     }
 
 });

@@ -91,11 +91,9 @@ router.beforeEach((to, from, next) => {
     
 }); 
 router.afterEach((to,from,failure)=>{
-    const userStore = useUserStore();
-
-    //console.log ('router after userStore.is_authenticated: ' + userStore.is_authenticated);
-    //console.log ('router after to.meta.auth: ' + to.meta.auth);
-
+    
+    //if (!failure) sendToAnalytics(to.fullPath);
+    
 })
 
  
