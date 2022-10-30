@@ -38,8 +38,10 @@ router.post('/signup', (req, res, next) => {
                         const col = '(UserLogin,UserPassword,UserMailPro)';
                         const value = '(' + db.escape(req.body.name) + ',' + db.escape(hash) + ',' + db.escape(req.body.email) + ')';
                         const token = jwt.sign({ id: hash }, 'the-super-strong-secret', { expiresIn: '24h' });
+
+                        //console.log (value);
                         try {
-                            const insertVal = insertOneEntrie(col, table, value);
+                            const insertVal = dbquery.insertOneEntrie(col, table, value);
 
                             if (insertVal) {
                                 const table = 'Users';

@@ -30,10 +30,11 @@ router.post('/allchat', (req, res, next) => {
     console.log('route allchat reached');
     if (auth(req).tokenid.length > 0) {
 
-        const table = "Threads";
-        condition = ' 1 order by `DateCreation` DESC limit 25 '; // toutes les ligne de la table thread
+        const table1 = "Threads";
+        const table2 = "Users";
+        condition = ' Threads.IdUser = Users.UserId '; // toutes les ligne de la table thread
 
-        dbquery.getEntries(table, condition)
+        dbquery.getJoinEntries(table1,table2, condition)
             .then((resolve) => {
                 const data = resolve;
                 res.status(200).json({ msg: 'select returned', data });
@@ -221,5 +222,30 @@ router.delete('/delete', (req, res, next) => {
     };
 
 });
+// ---------- dropFile  ( chat )
+router.post('/dropFile', (req, res, next) => {
 
+    if (auth(req).tokenid.length > 0) {
+
+        const table = "Threads";
+        condition = ' `IdUser` = ' + req.body.UserId + ' and `IdThread` = ' + req.body.ThreadId;
+        data = 
+
+        dbquery.updateOneEntrie(table,data, condition)
+            .then((resolve) => {
+                const data = resolve[0];
+                res.status(200).json({ msg: 'delete commited', data });
+
+            })
+            .catch((reject) => {
+                res.status(400).json({ msg: 'select return with error: ' + reject });
+            });
+
+
+    } else {
+
+        res.status(401).json({ msg: 'invalid token ' });
+    };
+});
+// ----------- create one thread (forum)
 module.exports = router;

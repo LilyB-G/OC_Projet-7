@@ -80,82 +80,78 @@ router.post('/setDroits', (req, res, next) => {
     if (auth(req).tokenid.length > 0) {
 
         const table = "DroitsUser";
-        let ctrlArray = [];
-        let returnVal = '';
+        let Array = req.body.arrayActionDroit;
+        let toCompareArray = [];
+        let resStatus = '';
 
-        let condition = '`IdUser` = ' + req.body.IdUser + ' and `NiveauDroit`= \'' + req.body.NiveauDroit + '\';';
+        let condition = '`IdUser` = ' + req.body.IdUser + ' and `NiveauDroit` =  \'' + req.body.NiveauDroit + '\'';
         dbquery.getEntries(table, condition)
             .then((result) => {
-                for (let obj of result) {
-                    // req.body.ActionDroit attendu sous forme ['Update','Create','Delete'...]
-                    // obj.ActionDroit dans la boucle = 'Create' puis 'Update'
-                    //console.log(req.body.ActionDroit);
-                    //console.log(obj.ActionDroit);
-
-                    if (!req.body.ActionDroit.includes(obj.ActionDroit) && obj.ActionDroit != undefined ) {
-                        // ici delete valeur
-                        let condition = '`IdDroits` = ' + obj.IdDroits +';';
-                        dbquery.deleteOneEntrie(table,condition)
-                        .then(() => {
-                            returnVal = 'success';
-
-                        })
-                        .catch((reject) => {
-                            returnVal = reject;
-                            res.status(400).json({ msg: 'select return with error: ' + reject });
-                        });
-                    }
-                    
-                    if (req.body.ActionDroit.includes(obj.ActionDroit)) {
-                        // la valeur est présente mais n'a pas changée => pas d'action sur la table, mais alimentation d'un array de contrôle
-                        ctrlArray.push(obj.ActionDroit);
-                        
-                    };
+                for (let item of result) {
+                    toCompareArray.push(item.ActionDroit);
                 };
-                // comparaison ctrlArray et req.body.ActionDroit les valeurs se trouvant dans req.body.ActionDroit mais absentes de ctrlArray sont des nouvelles valeurs à insérer
-                let finalArray = req.body.ActionDroit.filter((r) => !ctrlArray.includes(r));
+                // valeurs provenant du front comparées aux valeurs provenant de la base
 
-                console.log(finalArray);
-                
+                let Filtered = Array.filter((r) => toCompareArray.indexOf(r) == -1); // on cherche les valeurs non communes ( indexOf non trouvé == -1 )
+                console.log(Filtered);
+                if (Filtered.length > 0) {
+                    // insert new value
+                    for (let action of Filtered) {
+                        //console.log (action);
 
-                if (finalArray.length > 0) {
-                    condition = ''; 
-                    for (let member of finalArray) {
                         const data = {
                             IdUser: req.body.IdUser,
-                            ActionDroit: member,
+                            ActionDroit: action,
                             NiveauDroit: req.body.NiveauDroit,
                         };
 
-                        dbquery.InsertOrUpdateEntries(table, data, condition)
+                        dbquery.InsertOrUpdateEntries(table, data)
                             .then(() => {
-                                if (returnVal == '' || returnVal == 'success'){
-                                returnVal = 'success';
-                                };
+                                resStatus = 'Insert success of ActionDroit :' + data.ActionDroit;
 
                             })
                             .catch((reject) => {
-                                returnVal = reject;
-                                res.status(400).json({ msg: 'select return with error: ' + reject });
+                                
+                                resStatus = 'select return with error: ' + reject ;
                             });
-                        
                     };
-                    if (returnVal == 'success') {
-                        res.status(200).json({ msg: 'delete,update or insert ok' });
-                    }else{
-                        res.status(500).json({ msg: 'something wrong' });
-                    };
-                }
+                };
+                // vider Filtered
+                Filtered = [];
+                // valeurs provenant de la base comparées aux valeurs provenant du front
 
+                Filtered = toCompareArray.filter((r) => Array.indexOf(r) == -1); // on cherche les valeurs non communes ( indexOf non trouvé == -1 ) 
+                console.log(Filtered);
+                if (Filtered.length > 0) {
+                    // dans ce cas il y a plus de valeurs dans la base que de valeurs provenant du front => delete value
+                    for (let action of Filtered) {
+                        let condition = "`IdUser`= " + req.body.IdUser + " and `ActionDroit` = \'" + action + "\'";
+                        dbquery.deleteOneEntrie(table, condition)
+                            .then((result) => {
+                                resStatus = 'delete success of line :' + req.body.IdUser + ', action: ' + action;
+                            })
+                            .catch((reject) => {
+                                resStatus = 'select return with error:' + reject;
+                            });
+                    };
+                };
+
+                if (resStatus.includes('error:')) {
+                    res.status(400).json({ 'msg': resStatus });
+                }
+                else {
+
+                    res.status(200).json({ 'msg': resStatus });
+                }
 
             })
             .catch((error) => {
+                res.status(500).json({ 'msg': 'error mysql: ' + error })
                 console.log(error);
             });
 
     } else {
-
-        res.status(401).json({ msg: 'invalid token ' })
+        res.status(401).json({ 'msg': 'invalid token ' });
     };
 
 });
