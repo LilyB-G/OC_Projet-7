@@ -1,31 +1,4 @@
-
-Skip to content
-
-Pricing
-
-Sign in
-Sign up
-LilyB-G /
-OC_Projet-7
-Public
-
-Code
-Issues
-Pull requests
-Actions
-Projects
-Security
-
-Insights
-
-OC_Projet-7/frontend/src/views/EditProfile.vue
-@LilyB-G
-LilyB-G First commit
-Latest commit eaab67d 20 hours ago
-History
-1 contributor
-153 lines (142 sloc) 5.06 KB
-<template>
+<!-- <template>
 <div class="col-lg-8 mx-auto mt-3">
     <div class="card">
         <div class="card-body">
@@ -170,19 +143,7 @@ i.bi:hover {
 background-color: var(--bs-gray-300);
 }
 </style>
-Footer
-© 2022 GitHub, Inc.
-Footer navigation
 
-Terms
-Privacy
-Security
-Status
-Docs
-Contact GitHub
-Pricing
-API
-Training
-Blog
-About
 
+
+ -->

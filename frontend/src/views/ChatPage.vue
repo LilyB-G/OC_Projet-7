@@ -1,5 +1,5 @@
 <template>
-    <div class="card w-100 messages" v-for="message in chatStore.Chat.data">
+    <div class="card w-50 d-flex justify-content-center messages" v-for="message in chatStore.Chat.data">
         <div class="card-header">
             <img src="https://bootdey.com/img/Content/avatar/avatar7.png" class="rounded-circle" alt="Avatar">
             <div class="Head">{{message.UserLogin}}{{message.UserRole}}
