@@ -1,4 +1,4 @@
-const express = require('express');
+ express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const date = require('../services/dateTime');
@@ -33,8 +33,9 @@ router.post('/allchat', (req, res, next) => {
         const table1 = "Threads";
         const table2 = "Users";
         condition = ' Threads.IdUser = Users.UserId '; // toutes les ligne de la table thread
+        orderBy = 'ORDER by Threads.IdThread DESC'
 
-        dbquery.getJoinEntries(table1,table2, condition)
+        dbquery.getJoinEntries(table1,table2, condition, orderBy)
             .then((resolve) => {
                 const data = resolve;
                 res.status(200).json({ msg: 'select returned', data });
@@ -89,7 +90,7 @@ router.post('/updatepost', (req, res, next) => {
         let i = 0;
 
         for (let obj in req.body) {
-            if (obj != 'IdThread') {
+            if (obj != 'IdThread' && obj != 'UserId') {
                 let col = obj;
                 let val = req.body[obj];
 
@@ -124,61 +125,51 @@ router.post('/updatepost', (req, res, next) => {
 
 // ----------- create one post
 router.post('/createpost', (req, res, next) => {
-
+    
+    //front send postForm( token ,userId ,IdThread ,message ,files, action)
+    
     if (auth(req).tokenid.length > 0) {
 
-        // chercher les droits user associés à l'action
-        //console.log ( 'userId:' + req.body.data.idUser);
-        let queryString = 'Select * from `DroitsUser` where IdUser = ' + req.body.data.idUser + ';';
-        //1console.log (queryString);
-        connection.query(queryString, function (err, result) {
-            if (err) {
-                console.log(err);
-            }
-            //console.log(result.length);
-            if (result.length > 0) {
-                //console.log('entrée dans la boucle for')
-                for (const line of result) {
-                    //console.log(line);
-                    console.log(req.body.data.action);
-                    if (line.ActionDroit == req.body.data.action) {         // si l'action a réaliser est autorisée dans le context
+        const table = "Threads";
 
-                        const table = "Threads";
+        let i = 0;
+        let col = '(';
+        let val = '(';
 
-                        let i = 0;
-                        let col = '(';
-                        let val = '(';
+//console.log(req.body);
 
-                        for (let obj in req.body.data) {
-                            if (obj != 'action') {
-                                col = col + '`' + obj + '`, ';
-                                val = val + '\'' + req.body.data[obj] + '\', ';
-                            }
-                            i++;
-                        };
-                        console.log('avant:' + col + ' | ' + val);
-                        col = col.slice(0, -2) + ')';  // ajout parenthèse de fin
-                        val = val.slice(0, -2) + ')'; // String - deux derniers caractères : , et [esp]
-                        console.log('après:' + col + ' | ' + val);
-
-                        console.log('col: ' + col + 'val:' + val);
-                        dbquery.insertOneEntrie(col, table, val)
-                            .then((resolve) => {
-                                res.status(200).json({ msg: 'insert commited' });
-
-                            })
-                            .catch((reject) => {
-                                res.status(400).json({ msg: 'select return with error: ' + reject });
-                            });
-                    };
+        for (let obj in req.body) {
+            if (obj != 'IdThread'&& obj != 'idFichiersJoints'){
+                if (obj != 'UserId') {
+                    col = col + '`' + obj + '`, ';
+                    val = val + '\'' + req.body[obj] + '\', ';
                 };
-
-            }
-            else {
-                res.status(500).json({ msg: "user right undefined for this action" });
-
+                if (obj == 'UserId') {
+                    col = col + '`IdUser`, ';
+                    val = val + '\'' + req.body[obj] + '\', ';
+                };
             };
-        });
+
+       
+            i++;
+        };
+
+        //console.log('avant:' + col + ' | ' + val);
+        col = col.slice(0, -2) + ')';  // ajout parenthèse de fin
+        val = val.slice(0, -2) + ')'; // String - deux derniers caractères : , et [esp]
+        
+        //console.log('après:' + col + ' | ' + val);
+
+        console.log('col: ' + col + 'val:' + val);
+        dbquery.insertOneEntrie(col, table, val)
+            .then((resolve) => {
+                res.status(200).json({ msg: 'insert commited' });
+
+            })
+            .catch((reject) => {
+                res.status(400).json({ msg: 'select return with error: ' + reject });
+            });
+                 
     } else {
         res.status(401).json({ msg: 'invalid token ' });
     };
@@ -247,5 +238,56 @@ router.post('/dropFile', (req, res, next) => {
         res.status(401).json({ msg: 'invalid token ' });
     };
 });
+router.post('/deleteFile', (req, res, next) => {
+
+    if (auth(req).tokenid.length > 0) {
+
+        const table = "Threads";
+        condition = ' `IdUser` = ' + req.body.UserId + ' and `IdThread` = ' + req.body.ThreadId;
+        data = 
+
+        dbquery.updateOneEntrie(table,data, condition)
+            .then((resolve) => {
+                const data = resolve[0];
+                res.status(200).json({ msg: 'delete commited', data });
+
+            })
+            .catch((reject) => {
+                res.status(400).json({ msg: 'select return with error: ' + reject });
+            });
+
+
+    } else {
+
+        res.status(401).json({ msg: 'invalid token ' });
+    };
+});
+router.post('/getFiles', (req, res, next) => {
+
+    if (auth(req).tokenid.length > 0) {
+
+        const table = "Threads";
+        condition = ' `IdUser` = ' + req.body.UserId + ' and `IdThread` = ' + req.body.ThreadId;
+        data = 
+
+        dbquery.updateOneEntrie(table,data, condition)
+            .then((resolve) => {
+                const data = resolve[0];
+                res.status(200).json({ msg: 'delete commited', data });
+
+            })
+            .catch((reject) => {
+                res.status(400).json({ msg: 'select return with error: ' + reject });
+            });
+
+
+    } else {
+
+        res.status(401).json({ msg: 'invalid token ' });
+    };
+});
+
+
+
 // ----------- create one thread (forum)
 module.exports = router;

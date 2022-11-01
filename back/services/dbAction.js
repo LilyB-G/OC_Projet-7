@@ -14,9 +14,14 @@ exports.getEntries = function (table, condition) {
         });
     });
 };
-exports.getJoinEntries = function (table1,table2, condition) {
+exports.getJoinEntries = function (table1,table2, condition, orderBy) {
     return new Promise((resolve, reject) => {
-        let queryString = "SELECT * FROM `" + table1 + "` inner join `" + table2 + "` ON " + condition + ";";
+        let queryString = "SELECT * FROM `" + table1 + "` inner join `" + table2 + "` ON " + condition ;
+        if (orderBy.length > 0){
+            queryString = queryString + orderBy + ';';
+        }else{
+            queryString = queryString + ';';
+        }
         console.log(queryString);
         connection.query(queryString, function (err, result) {
             if (err) {
