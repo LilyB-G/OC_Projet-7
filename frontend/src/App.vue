@@ -4,10 +4,10 @@
 
       <div class="row">
 
-        <div class="col border ">
+        <div class="col border">
           <sideMenu />
         </div>
-        <div class="d-flex justify-content-md-center mainFrame">
+        <div class="mainFrame">
           <div class="col-lg border ">
 
             <router-view />
@@ -39,7 +39,7 @@ body {
   background-color: #d0cedc;
 }
 .mainFrame {
-  max-width : 95%
+  max-width : 70%
 }
 </style>
 
