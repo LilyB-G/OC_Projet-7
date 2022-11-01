@@ -9,9 +9,9 @@
                 </div>
             </div>
             <button type="button" class="btn btn-outline-danger ms-5"
-                @click="chatStore.action = 'answer'">Répondre</button>
+                @click="formAnswer(message.IdThread, message.ThreadMessage, message.UserLogin)">Répondre</button>
             <button type="button" class="btn btn-outline-danger ms-5"
-                @click="formUpdate( message.IdThread ) " v-if="userStore.userId == message.IdUser">Update</button>    
+                @click="formUpdate( message.IdThread, message.ThreadMessage ) " v-if="userStore.userId == message.IdUser">Update</button>    
         </div>
         <img src="https://picsum.photos/400/200" class="card-img-top" alt="...">
         <div class="card-body">
@@ -49,12 +49,38 @@ const userStore = useUserStore();
     // ini variables
 
 
-function formUpdate(idThread){
-    chatStore.threadEdited = idThread;
-    chatStore.action = 'update';
-       
-}
+    const postAttr = chatStore.postAttr;
 
+
+function formUpdate(idThread,content){
+    console.log (idThread);
+    console.log (content);
+    
+
+    Object.assign(postAttr, {
+        'IdThread': idThread,
+        'action': 'update',
+        'messageContent': content,
+    });
+    //console.log (chatStore.postAttr);
+
+
+}
+function formAnswer(idThread,content, threadOwner){
+    //console.log (idThread);
+    //console.log (content);
+    
+
+    Object.assign(postAttr, {
+        'IdThread': idThread,
+        'action': 'answer',
+        'messageContent': content,
+        'nameOwner': threadOwner,
+    });
+    console.log (chatStore.postAttr);
+
+
+}
 
 
 </script>

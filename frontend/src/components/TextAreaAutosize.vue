@@ -2,36 +2,34 @@
     <div class="container border bg-light fixed-top">
         <div class="d-flex">
 
-            <div v-if=" chatStore.action == 'create' ">
+            <div v-if="(chatStore.postAttr.action == 'create' || chatStore.postAttr.action == 'answer')">
                 <createTools /> <!-- vue components tools create -->
             </div>
-            <div v-if=" chatStore.action.includes('update') ">
+            <div v-if="chatStore.postAttr.action == 'update'">
                 <updateTools /> <!-- vue components tools update -->
             </div>
         </div>
-        <div v-if=" chatStore.action == 'create'">
-            <textarea ref="textarea"
-                class="block w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-blue-400 focus:ring-blue-400" v-model="chatStore.content">
+        <div
+            v-if="(chatStore.postAttr.action == 'create' || chatStore.postAttr.action == 'update' || chatStore.postAttr.action == 'answer')">
+            <img src="ListImages" alt="">
+                {{ListImages}}
+         
+            <textarea 
+                class="block w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-blue-400 focus:ring-blue-400"
+                v-model = "thisPost.messageContent" 
+                @input = "inputevent">
             </textarea>
-            
+
         </div>
-        <div v-if=" chatStore.action == 'update'">
-            <textarea ref="textarea"
-                class="block w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-blue-400 focus:ring-blue-400" v-model="chatStore.content">
-            </textarea>
-            
-        </div>    
         <div class="d-flex justify-content-end align-items">
-            <div v-if=" chatStore.action == 'create' ">
-                <button type="button" class="btn btn-danger" @click="insert">Send</button>
+            <div>
+                <button type="button" class="btn btn-danger"
+                    v-if="(chatStore.postAttr.action == 'create' || chatStore.postAttr.action == 'answer')"
+                    @click="post">Send</button>
+                <button type="button" class="btn btn-danger" v-if="chatStore.postAttr.action == 'update'"
+                    @click="post">Actualize</button>
                 <button type="button" class="btn btn-secondary" @click="close">Abort</button>
-
             </div>
-            <div v-if=" chatStore.action.includes( 'update' ) ">
-                <button type="button" class="btn btn-danger" @click="update">Actualize</button>
-                <button type="button" class="btn btn-secondary" @click="close">Abort</button>
-            </div>
-
         </div>
     </div>
     <br>
@@ -47,7 +45,7 @@
 */
 import { ref } from "vue";
 
-import {useAutoresizeTextarea} from "@/components/resizeTextArea";
+import { useAutoresizeTextarea } from "@/components/resizeTextArea";
 import createTools from '@/components/forms/createTools.vue';
 import updateTools from '@/components/forms/updateTools.vue';
 import { useChatStore } from '@/store/chatStore';
@@ -63,37 +61,86 @@ const userStore = useUserStore();
 const textarea = ref();
 useAutoresizeTextarea(textarea);
 
+const files = ''; // a compléter ultérieurement
+const userId = userStore.userId;
+const IdThread = chatStore.postAttr.IdThread;
+const data = {};
+
+
+const action = chatStore.postAttr.action;
+const thisPost = ref(chatStore.postAttr);
+
+//console.log(thisPost.value.messageContent);
+
+const ListImages = sortImages();
+
+function sortImages(){
+    
+    // get images from db
+    //chatStore.getFiles(userStore.token,IdThread);
+    // resize images
+
+
+};
+
+if (thisPost.value.action == 'answer') {
+    const head = thisPost.value.nameOwner + ' a écrit: < ';
+    //console.log('head:' + head);
+    thisPost.value.messageContent = head + thisPost.value.messageContent + ' >';
+};
+
+//console.log('message:' + thisPost.value.messageContent);
+
 function close() {
-    chatStore.action = '';
+    thisPost.value.action = '';
 };
 
-function insert(){
-    chatStore.postInsert(userStore.token);
-    // recharger la page
-    chatStore.get(userStore.token);
-    // close chatStore.action
-    chatStore.action = '';
-};
-function update(){
-    let i = '';
-    for ( let index in chatStore.ori ){
-        i = chatStore.ori[index].IdThread; 
-        if (chatStore.ori[index].ThreadMessage != chatStore.Chat.data[i].ThreadMessage ){
+function post() {
+    
+    if (action == 'update') {
+       Object.assign(data,{
+            UserId: userId,
+            IdThread: IdThread,
+            ThreadMessage: thisPost.value.messageContent,
+            idFichiersJoints: files,
+        });
+    };
+    if (action == 'create') { 
+        Object.assign(data,{
+            UserId: userId,
+            ThreadMessage: thisPost.value.messageContent,
+            idFichiersJoints: files,
+        });
+    };
+    if (action == 'answer') { 
+        Object.assign(data,{
+            UserId: userId,
+            ThreadMessage: thisPost.value.messageContent,
+            idFichiersJoints: files,
+        });
 
-                console.log('différence trouvée');
-         }
-        // if (chatStore.ori[i].IdThread == obj.IdThread && chatStore.ori[i].ThreadMessage != obj.ThreadMessage ){
-        
-        //     console.log("ori: " + chatStore.ori[i].ThreadMessage + ' | new: ' + obj.ThreadMessage );
-        //chatStore.postUpdate(userStore.token,obj.IdThread, userStore.userId,files);
-        // recharger la page
-        //chatStore.get(userStore.token);
     };
     
-    // close chatStore.action
-    chatStore.action = '';
-    
+    //console.log (data);
+    chatStore.postForm(userStore.token, data, action);
+    // recharger la page
+    chatStore.get(userStore.token);
+    // vider chatStore.postAttr
+    Object.assign(chatStore.postAttr,
+     {
+        'IdThread': '',
+        'action': '',
+        'messageContent': '',
+        'nameOwner': '',
+     });
+
+    // close 
+    close();
 };
+
+const inputevent = () => {
+    console.log (thisPost.value.messageContent);
+}
 
 </script>
     

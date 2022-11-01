@@ -1,11 +1,11 @@
 <template>
-    <button class="btn btn-dark fixed-top" v-if="showPostCreate()" @click = "chatStore.action = 'create'">Create New </button>
+    <button class="btn btn-dark fixed-top" v-if="showPostCreate()" @click = "chatStore.postAttr.action = 'create'">Create New </button>
 
     <div class="zindex">
         <div class="container-sm">
             <div class="form-floating mt-3" v-if="chatStore.showForm">
 
-                <textAreaAutosize v-model="chatStore.content" />
+                <textAreaAutosize />
 
             </div>
         </div>

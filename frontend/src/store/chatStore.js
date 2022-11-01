@@ -9,9 +9,8 @@ export const useChatStore = defineStore({
 
   id: 'post',
   state: () => ({
-    content: '',
+    postAttr: {},
     ori: [],
-    action: '',
     files: [],
     showForm: false,
     token: '',
@@ -66,15 +65,127 @@ export const useChatStore = defineStore({
           });
       }
   },
-  postInsert(token,user,thread,files) {
-    const data = {
-      data: {
-        Thread: thread,
-        User: user,
-        ListFiles: files,
-        },
+
+  getFiles(token,IdThread){
+    let toUrl = 'http://localhost:3000/threads/getFiles';
+    
+    const axiosConfig = {
+      headers: {
+        "Content-Type": 'application/json',
+        "Authorization": 'Bearer ' + token,
+        "Access-Control-Allow-Origin": "*",
+
+      }
     };
-    const toUrl = 'http://localhost:3000/threads/createpost';
+    const data = {
+      IdThread: IdThread,
+    }
+
+    if (token) {
+
+      Axios.post(toUrl, data, axiosConfig)
+        .then((response) => {
+          //console.log("status:" + typeof (response.status) + " | data: " + JSON.stringify(response.data));
+          if (response.status == 200) {
+            //console.log(response.data);
+            console.log('get images successfully');
+            
+          } else {
+            console.log('error ' + response.status);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+
+        });
+    }
+
+  },
+  deleteFile(token,IdThread,IdFile){
+    let toUrl = 'http://localhost:3000/threads/deleteFile';
+    
+    const axiosConfig = {
+      headers: {
+        "Content-Type": 'application/json',
+        "Authorization": 'Bearer ' + token,
+        "Access-Control-Allow-Origin": "*",
+
+      }
+    };
+    const data = {
+      IdThread: IdThread,
+      idFichiersJoints: IdFile,
+    };
+
+    if (token) {
+
+      Axios.post(toUrl, data, axiosConfig)
+        .then((response) => {
+          //console.log("status:" + typeof (response.status) + " | data: " + JSON.stringify(response.data));
+          if (response.status == 200) {
+            //console.log(response.data);
+            console.log('get images successfully');
+            
+          } else {
+            console.log('error ' + response.status);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+
+        });
+    }
+
+  },
+  addFile(token,IdThread){
+    let toUrl = 'http://localhost:3000/threads/dropFile';
+    
+    const axiosConfig = {
+      headers: {
+        "Content-Type": 'application/json',
+        "Authorization": 'Bearer ' + token,
+        "Access-Control-Allow-Origin": "*",
+
+      }
+    };
+    const data = {
+      IdThread: IdThread,
+    };
+
+    if (token) {
+
+      Axios.post(toUrl, data, axiosConfig)
+        .then((response) => {
+          //console.log("status:" + typeof (response.status) + " | data: " + JSON.stringify(response.data));
+          if (response.status == 200) {
+            //console.log(response.data);
+            console.log('get images successfully');
+            
+          } else {
+            console.log('error ' + response.status);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+
+        });
+    }
+
+  },
+
+  postForm( token ,data , action) {
+    
+    console.log(data);
+
+    let toUrl = '';
+
+    if (action == 'create' || action =='answer'){
+      toUrl = 'http://localhost:3000/threads/createpost';
+    };
+    
+    if (action == 'update'){
+      toUrl = 'http://localhost:3000/threads/updatepost';
+    }
     const axiosConfig = {
       headers: {
         "Content-Type": 'application/json',
@@ -91,8 +202,7 @@ export const useChatStore = defineStore({
           //console.log("status:" + typeof (response.status) + " | data: " + JSON.stringify(response.data));
           if (response.status == 200) {
             //console.log(response.data);
-            alert('post created successfully')
-            this.action = '';
+            console.log('post ' + action + 'd successfully');
             
 
           } else {
@@ -106,43 +216,7 @@ export const useChatStore = defineStore({
     }
 
   },
-  postUpdate(token,IdThread, userId , files) {
-    const data = {
-      IdUser: userId,
-      files: files,
-      IdThread : IdThread,
-    };
-    const toUrl = 'http://localhost:3000/threads/updatepost';
-    const axiosConfig = {
-      headers: {
-        "Content-Type": 'application/json',
-        "Authorization": 'Bearer ' + token,
-        "Access-Control-Allow-Origin": "*",
-
-      }
-    };
-
-    //console.log(obj);
-    if (token) {
-
-      Axios.post(toUrl, data, axiosConfig)
-        .then((response) => {
-          //console.log("status:" + typeof (response.status) + " | data: " + JSON.stringify(response.data));
-          if (response.status == 200) {
-            //console.log(response.data);
-            alert('update send successfully')
-            this.action = '';
-         
-          } else {
-            console.log('error ' + response.status);
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-
-        });
-    }
-  },
+ 
   actualRoute(path) {
     this.routePath = path;
     console.log(this.routePath);
@@ -151,7 +225,7 @@ export const useChatStore = defineStore({
 },
 getters: {
   postAction: (state) => {
-    if (state.action.includes('update') || state.action == 'create') {
+    if (state.postAttr.action == 'update' || state.postAttr.action == 'create' || state.postAttr.action == 'answer' ) {
       state.showForm = true;
 
     } else {
@@ -160,23 +234,7 @@ getters: {
     };
     return state.showForm;
   },
-  postContent: (state) => {
-    if (state.action == 'update') {
-      const array = state.Chat.data;
-      const currentThread = state.threadEdited;
-
-      for (let obj of array) {
-        if (obj.IdThread == currentThread) {
-          state.content = obj.ThreadMessage;
-          
-        };
-
-      }
-    } else {
-      state.content = '';
-    }
-  },
-
+  
 }
 });
 

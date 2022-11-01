@@ -210,8 +210,6 @@ else {
   console.log('error ' + 'unautorized');
 };
 
-
-
 const updateValue = (obj) => {
 
   let toUrl = 'http://localhost:3000/auth/updateuser';
