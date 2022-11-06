@@ -218,21 +218,28 @@ router.post('/dropFile', (req, res, next) => {
 
     if (auth(req).tokenid.length > 0) {
 
-        const table = "Threads";
-        condition = ' `IdUser` = ' + req.body.UserId + ' and `IdThread` = ' + req.body.ThreadId;
-        data = 
+        const Table = 'FichiersJoint';
+        const Col = ' (`FileName`,`File`) ';
+        const condition = ' FileName = \'' + req.body.name + '\' ORDER BY `IdFile` DESC LIMIT 1' ;
+        const Value = ' (\'' + req.body.name + '\',\'' + req.body.file + '\') ;';
 
-        dbquery.updateOneEntrie(table,data, condition)
+        dbquery.insertOneEntrie(Col,Table,Value) // insert values
             .then((resolve) => {
-                const data = resolve[0];
-                res.status(200).json({ msg: 'delete commited', data });
-
+                console.log(resolve);
             })
             .catch((reject) => {
-                res.status(400).json({ msg: 'select return with error: ' + reject });
+                console.log(reject);
+            });             
+            
+        dbquery.getOneEntrie('IdFile',Table,condition) // retrieve values
+            .then((resolve) => {
+                const result = resolve[0].IdFile;
+                res.status(200).json({ msg: 'insert img commited', result });
+            })
+            .catch((reject) => {
+                console.log(reject);
             });
-
-
+        
     } else {
 
         res.status(401).json({ msg: 'invalid token ' });
