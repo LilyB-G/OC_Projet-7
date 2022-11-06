@@ -2,13 +2,13 @@
   <div class="body">
     <div class="container-fluid border ">
 
-      <div class="row">
+      <div class="ms-5">
 
         <div class="col border">
           <sideMenu />
         </div>
-        <div class="mainFrame">
-          <div class="col-lg border ">
+        <div class="d-flex justify-content-center ms-5 mainFrame">
+          <div class="col-lg border ms-5">
 
             <router-view />
           </div>
@@ -35,12 +35,14 @@ import NavBar from '@/views/NavBar.vue';
 </script>
 
 <style>
-body {
-  background-color: #d0cedc;
+.body{
+  background-color: #D0CEDC;
 }
-.mainFrame {
-  max-width : 70%
-}
+
+/* .mainFrame{
+  max-width: 100%;
+} */
+
 </style>
 
 
