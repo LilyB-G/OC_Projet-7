@@ -11,8 +11,7 @@
         </div>
         <div
             v-if="(chatStore.postAttr.action == 'create' || chatStore.postAttr.action == 'update' || chatStore.postAttr.action == 'answer')">
-            <img src="ListImages" alt="">
-                {{ListImages}}
+            
          
             <textarea 
                 class="block w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-blue-400 focus:ring-blue-400"
@@ -72,7 +71,7 @@ const thisPost = ref(chatStore.postAttr);
 
 //console.log(thisPost.value.messageContent);
 
-const ListImages = sortImages();
+//const ListImages = sortImages();
 
 function sortImages(){
     
@@ -93,6 +92,7 @@ if (thisPost.value.action == 'answer') {
 
 function close() {
     thisPost.value.action = '';
+    thisPost.value.clear = true;
 };
 
 function post() {
@@ -102,21 +102,20 @@ function post() {
             UserId: userId,
             IdThread: IdThread,
             ThreadMessage: thisPost.value.messageContent,
-            idFichiersJoints: files,
+            ListFiles: chatStore.filesToSend,
         });
     };
     if (action == 'create') { 
         Object.assign(data,{
             UserId: userId,
             ThreadMessage: thisPost.value.messageContent,
-            idFichiersJoints: files,
+            ListFiles: chatStore.filesToSend,
         });
     };
     if (action == 'answer') { 
         Object.assign(data,{
             UserId: userId,
             ThreadMessage: thisPost.value.messageContent,
-            idFichiersJoints: files,
         });
 
     };

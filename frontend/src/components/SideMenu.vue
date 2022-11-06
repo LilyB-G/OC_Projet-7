@@ -16,7 +16,8 @@
 <script setup>
 import { useChatStore } from '@/store/chatStore';
 import textAreaAutosize from '@/components/TextAreaAutosize.vue';
-import {useRoute} from 'vue-router'
+import {useRoute} from 'vue-router';
+
 
 const chatStore = useChatStore();
 const thisRoute = useRoute();
